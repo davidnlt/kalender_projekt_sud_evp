@@ -66,11 +66,15 @@ export default {
   methods: {
     async login() {
       await axios
-        .get(
-          `http://localhost:8080/UserLogin?benutzername=${this.benutzername}&passwort=${this.passwort}`
-        )
+        .get("http://localhost:8080/userinfo")
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
+      //await axios
+      //  .get(
+      //    `http://localhost:8080/UserLogin?benutzername=${this.benutzername}&passwort=${this.passwort}`
+      //  )
+      //  .then((response) => console.log(response))
+      //  .catch((error) => console.log(error));
       //  if(response.status == 200){
       //  localStorage.setItem("user",JSON.stringify(response.data[0]));
       //  this.$router.push({ name: "GSTC" });
