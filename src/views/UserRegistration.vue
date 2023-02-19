@@ -66,9 +66,14 @@
                     rounded
                   ></v-text-field>
 
-                  <v-btn type="submit" x-large block dark rounded
+                  <v-btn type="submit" x-large block dark rounded class="mb-4"
                     >Registrieren</v-btn
                   >
+                  <v-col class="text-right">
+                    <v-btn to="/login" large rounded>
+                      Hast du bereits einen Account?
+                    </v-btn>
+                  </v-col>
                 </form>
               </v-card-text>
             </v-card>
@@ -111,6 +116,7 @@ export default {
         })
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
+      this.$router.push({ name: "VacationCalendar" });
     },
   },
 };

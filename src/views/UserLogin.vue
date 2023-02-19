@@ -37,6 +37,12 @@
                   <v-btn type="submit" x-large block dark rounded
                     >Anmelden</v-btn
                   >
+
+                  <v-col class="text-right">
+                    <v-btn to="/registration" x-large rounded>
+                      Registrieren
+                    </v-btn>
+                  </v-col>
                 </form>
               </v-card-text>
             </v-card>
@@ -61,14 +67,19 @@ export default {
           return "Füllen Sie dieses Feld aus.";
         },
       ],
+      data: null,
     };
   },
   methods: {
     async login() {
       await axios
         .get("http://localhost:8080/userinfo")
-        .then((response) => console.log(response))
+        .then((response) => {
+          this.data = response.data;
+        })
         .catch((error) => console.log(error));
+      localStorage.setItem("user", this.data);
+      this.$router.push({ name: "VacationCalendar" });
       //await axios
       //  .get(
       //    `http://localhost:8080/UserLogin?benutzername=${this.benutzername}&passwort=${this.passwort}`
@@ -77,11 +88,9 @@ export default {
       //  .catch((error) => console.log(error));
       //  if(response.status == 200){
       //  localStorage.setItem("user",JSON.stringify(response.data[0]));
-      //  this.$router.push({ name: "GSTC" });
+
       //  }
       //  },
-      //  console.log(this.username);
-      //  this.$router.push({ name: "VacationCalendar" });
     },
   },
 };

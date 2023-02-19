@@ -2,9 +2,9 @@
   <v-app>
     <CalendarHeader />
     <v-main>
-      <v-row class="fill-height">
+      <v-row>
         <v-col>
-          <v-sheet height="75">
+          <v-sheet>
             <v-toolbar flat>
               <v-btn
                 variant="outlined"
@@ -12,24 +12,12 @@
                 color="grey-darken-2"
                 @click="setToday"
               >
-                Today
+                Heute
               </v-btn>
-              <v-btn
-                fab
-                variant="text"
-                size="small"
-                color="grey-darken-2"
-                @click="prev"
-              >
+              <v-btn fab small color="grey-darken" @click="prev">
                 <v-icon size="small"> mdi-chevron-left </v-icon>
               </v-btn>
-              <v-btn
-                fab
-                variant="text"
-                size="small"
-                color="grey-darken-2"
-                @click="next"
-              >
+              <v-btn fab small color="grey-darken" @click="next">
                 <v-icon size="small"> mdi-chevron-right </v-icon>
               </v-btn>
               <v-toolbar-title v-if="$refs.calendar">
@@ -49,9 +37,12 @@
                   </v-btn>
                 </template>
               </v-menu>
+              <v-btn variant="outlined" class="me-4" color="grey-darken-2">
+                Urlaubseintrag hinzufügen
+              </v-btn>
             </v-toolbar>
           </v-sheet>
-          <v-sheet height="800">
+          <v-sheet height="700">
             <v-calendar
               ref="calendar"
               v-model="focus"
@@ -104,15 +95,19 @@
         </v-col>
       </v-row>
     </v-main>
+    <CalendarFooter />
   </v-app>
 </template>
 
 <script>
 import CalendarHeader from "../components/CalendarHeader.vue";
+import CalendarFooter from "../components/CalendarFooter.vue";
+
 export default {
   name: "VacationCalendar",
   components: {
     CalendarHeader,
+    CalendarFooter,
   },
   data: () => ({
     focus: "",
