@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import sud_evp.configuration.JWTTokenGenerator;
 import sud_evp.database.DatabaseHandler;
 import sud_evp.database.model.Entry;
-import sud_evp.database.model.User;
-
+import sud_evp.database.model.Person;
 
 /**
  * @author busch
@@ -32,6 +33,8 @@ public class BasicController {
 	
 	@Autowired
 	private DatabaseHandler databaseHandler;
+	@Autowired
+	private JWTTokenGenerator jwtTokenGenerator;
 	
 	@GetMapping("/dataentries")
 	public List<Entry> getEntries(@RequestParam int userid, @RequestParam int year, @RequestParam int month) {
@@ -39,12 +42,13 @@ public class BasicController {
 	}
 	
 	@GetMapping("/userinfo")
-	public List<User> getUserInfo(@RequestParam int userid){
-		return this.databaseHandler.getUserInfo(userid);
+	public List<Person> getUserInfo(@RequestHeader("Authorization") String bearertoken){
+		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);
+		return this.databaseHandler.getUserInfo(username);
 	}
 	
 	@GetMapping("/departmentusers")
-	public List<User> getDepartmentUsers(@RequestParam int userid){
+	public List<Person> getDepartmentUsers(@RequestParam int userid){
 		return this.databaseHandler.getDepartmentUserNames(userid);
 	}
 	
@@ -58,7 +62,7 @@ public class BasicController {
 		}
 		if (this.databaseHandler.checkDaysRemaining(newEntry)) {
 			return new ResponseEntity<>("Nicht genügend Urlaubstage vorhanden.\n" +
-										"Rest: " + this.databaseHandler.getUserInfo(newEntry.getUser_id()).get(0).getHolidays_remaning() + "\n" +
+										//"Rest: " + this.databaseHandler.getUserInfo(newEntry.getUser_id()).get(0).getHolidays_remaining() + "\n" +
 										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(newEntry), HttpStatus.BAD_REQUEST);
 		}
 		this.databaseHandler.insertEntry(newEntry);
@@ -73,7 +77,7 @@ public class BasicController {
 		}
 		if (!this.databaseHandler.checkDaysRemaining(updatedEntry)) {
 			return new ResponseEntity<>("Nicht genügend Urlaubstage vorhanden.\n" +
-										"Rest: " + this.databaseHandler.getUserInfo(updatedEntry.getUser_id()).get(0).getHolidays_remaning() + "\n" +
+										//"Rest: " + this.databaseHandler.getUserInfo(updatedEntry.getUser_id()).get(0).getHolidays_remaining() + "\n" +
 										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(updatedEntry), HttpStatus.BAD_REQUEST);
 		}
 		this.databaseHandler.updateEntry(updatedEntry);
@@ -85,5 +89,5 @@ public class BasicController {
 	public void deleteEntry(@RequestParam int userid, @RequestParam int entryid) {
 		this.databaseHandler.deleteEntry(userid, entryid);
 	}
-
+	
 }

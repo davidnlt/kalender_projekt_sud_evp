@@ -7,17 +7,17 @@ package sud_evp.database.model;
  * @author busch
  *
  */
-public class User {
+public class Person {
 	private String firstname;
 	private String surname;
 	private String department;
 	private Integer holidays_total;
-	private Integer holidays_remaning;
+	private Integer holidays_remaining;
 	
 	/*
 	 * Default Constructor
 	 */
-	public User() {
+	public Person() {
 		this("","","",0,0);
 	}
 	
@@ -29,12 +29,12 @@ public class User {
 	 * @param urlaubstage_gesamt - days off total
 	 * @param urlaubstage_rest - days off remaining
 	 */
-	public User(String firstname, String surname, String department, Integer holidays_total, Integer holidays_remaning) {
+	public Person(String firstname, String surname, String department, Integer holidays_total, Integer holidays_remaning) {
 		this.setFirstname(firstname);
 		this.setSurname(surname);
 		this.setDepartment(department);
 		this.setHolidays_total(holidays_total);
-		this.setHolidays_remaning(holidays_remaning);
+		this.setHolidays_remaining(holidays_remaning);
 	}
 	
 	//Getter - Setter - Methods
@@ -70,12 +70,12 @@ public class User {
 		this.holidays_total = holidays_total;
 	}
 
-	public Integer getHolidays_remaning() {
-		return holidays_remaning;
+	public Integer getHolidays_remaining() {
+		return holidays_remaining;
 	}
 
-	public void setHolidays_remaning(Integer holidays_remaning) {
-		this.holidays_remaning = holidays_remaning;
+	public void setHolidays_remaining(Integer holidays_remaining) {
+		this.holidays_remaining = holidays_remaining;
 	}
 
 }

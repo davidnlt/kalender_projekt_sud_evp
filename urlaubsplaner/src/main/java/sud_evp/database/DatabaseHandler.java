@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import sud_evp.database.model.Entry;
 import sud_evp.database.model.EntryMapper;
-import sud_evp.database.model.User;
-import sud_evp.database.model.UserMapper;
+import sud_evp.database.model.Person;
+import sud_evp.database.model.PersonMapper;
 
 
 
@@ -51,8 +51,9 @@ public class DatabaseHandler {
 	public boolean checkDaysRemaining(Entry Entry) {
 		int workdaysEntry = calculateWorkdays(Entry);
 		int workdaysOldEntry = (Entry.getEntry_id() != 0) ? calculateWorkdays(getEntry(Entry.getUser_id(),Entry.getEntry_id()).get(0)) : 0;
-		List<User> user = getUserInfo(Entry.getUser_id());
-		return (user.get(0).getHolidays_remaning() < (workdaysEntry - workdaysOldEntry));
+		//List<Person> user = getUserInfo(Entry.getUser_id());
+		//return (user.get(0).getHolidays_remaining() < (workdaysEntry - workdaysOldEntry));
+		return true;
 	}
 	
 	public List<Entry> getEntry(int userid, int entryid){
@@ -92,7 +93,7 @@ public class DatabaseHandler {
 	
 	public void updateUserDays(Entry Entry) {
 		int difference = calculateWorkdays(Entry);
-		String sqlQuery = "UPDATE User SET holidays_remaning = holidays_remaning - ? WHERE id = ?";
+		String sqlQuery = "UPDATE User SET holidays_remaining = holidays_remaining - ? WHERE id = ?";
 		this.jdbcTemplate.update(sqlQuery, difference, Entry.getUser_id());
 	}
 	
@@ -104,21 +105,21 @@ public class DatabaseHandler {
 	}
 	
 	public void deleteEntry(int userid, int entryid) {
-		String sqlQuery = "UPDATE User AS u SET u.holidays_remaning = u.holidays_remaning + (SELECT he.holidays_entry FROM HolidayEntry AS he WHERE he.user_id = ? AND he.entry_id = ?) WHERE u.id = ?";
+		String sqlQuery = "UPDATE User AS u SET u.holidays_remaining = u.holidays_remaining + (SELECT he.holidays_entry FROM HolidayEntry AS he WHERE he.user_id = ? AND he.entry_id = ?) WHERE u.id = ?";
 		this.jdbcTemplate.update(sqlQuery, userid, entryid, userid);
 		sqlQuery = "DELETE FROM HolidayEntry WHERE user_id = ? AND entry_id = ?";
 		this.jdbcTemplate.update(sqlQuery, userid, entryid);
 	}
 	
-	public List<User> getUserInfo(int userid) {
-		String sqlQuery = "SELECT u.firstname, u.surname,d.name as department, u.holidays_total, u.holidays_remaning FROM User AS u LEFT JOIN Department AS d ON u.department_id = d.id WHERE u.id = " + userid;
-		List<User> user = jdbcTemplate.query(sqlQuery, new UserMapper());
+	public List<Person> getUserInfo(String username) {
+		String sqlQuery = "SELECT u.firstname, u.surname,d.name as department, u.holidays_total, u.holidays_remaining FROM User AS u LEFT JOIN Department AS d ON u.department_id = d.id WHERE u.username = '" + username + "'";
+		List<Person> user = jdbcTemplate.query(sqlQuery, new PersonMapper());
 		return user;
 	}
 	
-	public List<User> getDepartmentUserNames(int userid){
+	public List<Person> getDepartmentUserNames(int userid){
 		String sqlQuery = "SELECT firstname, surname FROM User WHERE department_id = (SELECT department_id FROM User WHERE id = " + userid + ")";
-		List<User> usernames = jdbcTemplate.query(sqlQuery, new UserMapper());
+		List<Person> usernames = jdbcTemplate.query(sqlQuery, new PersonMapper());
 		return usernames;
 	}
 	
