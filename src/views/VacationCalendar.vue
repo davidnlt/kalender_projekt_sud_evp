@@ -37,9 +37,94 @@
                   </v-btn>
                 </template>
               </v-menu>
-              <v-btn variant="outlined" class="me-4" color="grey-darken-2">
-                Urlaubseintrag hinzufügen
-              </v-btn>
+
+              <v-dialog v-model="dialog" persistent width="1024">
+                <template v-slot:activator="{ props }">
+                  <v-btn @click="dialog = true" v-bind="props">
+                    Urlaubseintrag hinzufügen
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-title>
+                    <span class="text-h5"> Urlaubseintrag hinzufügen</span>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-container>
+                      <form ref="form" @submit.prevent="register()">
+                        <v-text-field
+                          v-model="vorname"
+                          name="vornme"
+                          label="Vorname"
+                          type="text"
+                          color="black"
+                          :rules="rules"
+                          outlined
+                          rounded
+                        ></v-text-field>
+
+                        <v-text-field
+                          v-model="nachname"
+                          name="nachname"
+                          label="Nachname"
+                          type="text"
+                          color="black"
+                          :rules="rules"
+                          outlined
+                          rounded
+                        ></v-text-field>
+
+                        <v-text-field
+                          v-model="abteilung"
+                          name="abteilung"
+                          label="Abteilung"
+                          type="text"
+                          color="black"
+                          :rules="rules"
+                          outlined
+                          rounded
+                        ></v-text-field>
+
+                        <v-text-field
+                          v-model="username"
+                          name="username"
+                          label="Benutzername"
+                          type="text"
+                          color="black"
+                          :rules="rules"
+                          outlined
+                          rounded
+                        ></v-text-field>
+
+                        <v-text-field
+                          v-model="password"
+                          name="password"
+                          label="Passwort"
+                          type="password"
+                          color="black"
+                          :rules="rules"
+                          outlined
+                          rounded
+                        ></v-text-field>
+                        <v-btn
+                          color="blue-darken-1"
+                          variant="text"
+                          @click="dialog = false"
+                        >
+                          Schließen
+                        </v-btn>
+                        <v-btn
+                          type="submit"
+                          color="blue-darken-1"
+                          variant="text"
+                          @click="dialog = false"
+                        >
+                          Hinzufügen
+                        </v-btn>
+                      </form>
+                    </v-container>
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
             </v-toolbar>
           </v-sheet>
           <v-sheet height="700">
@@ -126,6 +211,7 @@ export default {
       "grey darken-1",
     ],
     names: ["Urlaub"],
+    dialog: false,
   }),
   mounted() {
     this.$refs.calendar.checkChange();

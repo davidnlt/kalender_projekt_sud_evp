@@ -38,8 +38,15 @@
                     >Anmelden</v-btn
                   >
 
-                  <v-col class="text-right">
-                    <v-btn to="/registration" x-large rounded>
+                  <v-col class="text-left">
+                    <v-btn large rounded> Passwort vergessen? </v-btn>
+                  </v-col>
+
+                  <v-divider></v-divider>
+
+                  <v-col class="text-center">
+                    <h1>Ich bin neu hier!</h1>
+                    <v-btn to="/registration" large rounded>
                       Registrieren
                     </v-btn>
                   </v-col>
@@ -72,25 +79,21 @@ export default {
   },
   methods: {
     async login() {
+      //await axios
+      //  .get("http://localhost:8080/userinfo")
+      //  .then((response) => {
+      //    this.data = response.data;
+      //  })
+      //  .catch((error) => console.log(error));
       await axios
-        .get("http://localhost:8080/userinfo")
+        .get(
+          `http://localhost:8080/login?benutzername=${this.benutzername}&passwort=${this.passwort}`
+        )
         .then((response) => {
           this.data = response.data;
         })
         .catch((error) => console.log(error));
       localStorage.setItem("user", this.data);
-      this.$router.push({ name: "VacationCalendar" });
-      //await axios
-      //  .get(
-      //    `http://localhost:8080/UserLogin?benutzername=${this.benutzername}&passwort=${this.passwort}`
-      //  )
-      //  .then((response) => console.log(response))
-      //  .catch((error) => console.log(error));
-      //  if(response.status == 200){
-      //  localStorage.setItem("user",JSON.stringify(response.data[0]));
-
-      //  }
-      //  },
     },
   },
 };
