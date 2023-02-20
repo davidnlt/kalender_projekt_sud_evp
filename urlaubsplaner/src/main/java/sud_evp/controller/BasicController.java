@@ -37,32 +37,32 @@ public class BasicController {
 	private JWTTokenGenerator jwtTokenGenerator;
 	
 	@GetMapping("/dataentries")
-	public List<Entry> getEntries(@RequestParam int userid, @RequestParam int year, @RequestParam int month) {
-		return this.databaseHandler.selectAllEntries(userid, year, month);
+	public List<Entry> getEntries(@RequestHeader("Authorization") String bearertoken, @RequestParam int year, @RequestParam int month) {
+		return this.databaseHandler.selectAllEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken), year, month);
 	}
 	
 	@GetMapping("/userinfo")
 	public List<Person> getUserInfo(@RequestHeader("Authorization") String bearertoken){
-		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);
-		return this.databaseHandler.getUserInfo(username);
+		return this.databaseHandler.getUserInfo(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));
 	}
 	
 	@GetMapping("/departmentusers")
-	public List<Person> getDepartmentUsers(@RequestParam int userid){
-		return this.databaseHandler.getDepartmentUserNames(userid);
+	public List<Person> getDepartmentUsers(@RequestHeader("Authorization") String bearertoken){
+		return this.databaseHandler.getDepartmentUserNames(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));
 	}
 	
 	@PostMapping("/entry/save")
-	public ResponseEntity<String> saveEntry(@RequestBody Entry newEntry) {
+	public ResponseEntity<String> saveEntry(@RequestHeader("Authorization") String bearertoken, @RequestBody Entry newEntry) {
+		
 		if (this.databaseHandler.checkDeparmentLimit(newEntry)){
-			return new ResponseEntity<>("Fehler, Abwesendheitslimit der Abteilung von " + this.databaseHandler.getDepartmentLimitFromUserID(newEntry.getUser_id()) + "% erreicht.", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Fehler, Abwesendheitslimit der Abteilung von " + this.databaseHandler.getDepartmentLimitFromUsername(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken)) + "% erreicht.", HttpStatus.BAD_REQUEST);
 		}
 		if (this.databaseHandler.checkEntryOverlap(newEntry)) {
 			return new ResponseEntity<>("Fehler, Überschneidung mit einen anderen Eintrag.", HttpStatus.BAD_REQUEST);
 		}
-		if (this.databaseHandler.checkDaysRemaining(newEntry)) {
+		if (this.databaseHandler.checkDaysRemaining(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken), newEntry)) {
 			return new ResponseEntity<>("Nicht genügend Urlaubstage vorhanden.\n" +
-										//"Rest: " + this.databaseHandler.getUserInfo(newEntry.getUser_id()).get(0).getHolidays_remaining() + "\n" +
+										"Rest: " + this.databaseHandler.getUserInfo(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken)).get(0).getHolidays_remaining() + "\n" +
 										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(newEntry), HttpStatus.BAD_REQUEST);
 		}
 		this.databaseHandler.insertEntry(newEntry);
@@ -71,13 +71,13 @@ public class BasicController {
 	}
 	
 	@PutMapping("/entry/update")
-	public ResponseEntity<String> updateEntry(@RequestBody Entry updatedEntry) {
+	public ResponseEntity<String> updateEntry(@RequestHeader("Authorization") String bearertoken, @RequestBody Entry updatedEntry) {
 		if (this.databaseHandler.checkEntryOverlap(updatedEntry)) {
 			return new ResponseEntity<>("Fehler, Überschneidung mit einen anderen Eintrag.", HttpStatus.BAD_REQUEST);
 		}
-		if (!this.databaseHandler.checkDaysRemaining(updatedEntry)) {
+		if (!this.databaseHandler.checkDaysRemaining(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken), updatedEntry)) {
 			return new ResponseEntity<>("Nicht genügend Urlaubstage vorhanden.\n" +
-										//"Rest: " + this.databaseHandler.getUserInfo(updatedEntry.getUser_id()).get(0).getHolidays_remaining() + "\n" +
+										"Rest: " + this.databaseHandler.getUserInfo(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken)).get(0).getHolidays_remaining() + "\n" +
 										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(updatedEntry), HttpStatus.BAD_REQUEST);
 		}
 		this.databaseHandler.updateEntry(updatedEntry);

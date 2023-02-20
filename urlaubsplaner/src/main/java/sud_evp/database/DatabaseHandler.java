@@ -26,14 +26,14 @@ public class DatabaseHandler {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
-	public List<Entry> selectAllEntries(int userid, int year, int month) {
+	public List<Entry> selectAllEntries(String username, int year, int month) {
 		String startdate = "'" + year + "-" + month + "-" + "01'";
 		String sqlQuery = "SELECT * FROM HolidayEntry "
 						+ "WHERE ((startdate<= " + startdate + "  AND enddate>= LAST_DAY(" + startdate + "))"
 						+ " OR (startdate >= " + startdate + " AND enddate <= LAST_DAY(" + startdate + "))"
 						+ " OR (startdate <= " + startdate + " AND enddate >= LAST_DAY(" + startdate + "))"
 						+ " OR (startdate <= " + startdate + " AND enddate >= LAST_DAY(" + startdate + ")))"
-						+ " AND user_id IN (SELECT id FROM User WHERE department_id = (SELECT department_id FROM User WHERE id = " + userid + "))";
+						+ " AND user_id IN (SELECT id FROM User WHERE department_id = (SELECT department_id FROM User WHERE username = '" + username + "'))";
 		List<Entry> entryList = jdbcTemplate.query(sqlQuery, new EntryMapper());
 
 		return entryList;
@@ -41,19 +41,15 @@ public class DatabaseHandler {
 	
 	public boolean checkDeparmentLimit(Entry Entry) {
 		String sqlQuery = "SELECT f_CheckOverlap(" + Entry.getUser_id() + ",'" + Entry.getStartdate() + "','" + Entry.getEnddate() + "')";
-		//String sqlQuery = "SELECT f_CheckOverlap(?,'?','?')";
 		Integer checkOverlap = jdbcTemplate.queryForObject(sqlQuery, Integer.class);
 		return (checkOverlap != null && checkOverlap > 0);
-		//List<Boolean> checkOverlap = jdbcTemplate.query(sqlQuery, new SQLResultBoolean());
-		//return checkOverlap.get(0).booleanValue();
 	}
 	
-	public boolean checkDaysRemaining(Entry Entry) {
+	public boolean checkDaysRemaining(String username, Entry Entry) {
 		int workdaysEntry = calculateWorkdays(Entry);
 		int workdaysOldEntry = (Entry.getEntry_id() != 0) ? calculateWorkdays(getEntry(Entry.getUser_id(),Entry.getEntry_id()).get(0)) : 0;
-		//List<Person> user = getUserInfo(Entry.getUser_id());
-		//return (user.get(0).getHolidays_remaining() < (workdaysEntry - workdaysOldEntry));
-		return true;
+		List<Person> user = getUserInfo(username);
+		return (user.get(0).getHolidays_remaining() < (workdaysEntry - workdaysOldEntry));
 	}
 	
 	public List<Entry> getEntry(int userid, int entryid){
@@ -117,17 +113,15 @@ public class DatabaseHandler {
 		return user;
 	}
 	
-	public List<Person> getDepartmentUserNames(int userid){
-		String sqlQuery = "SELECT firstname, surname FROM User WHERE department_id = (SELECT department_id FROM User WHERE id = " + userid + ")";
+	public List<Person> getDepartmentUserNames(String username){
+		String sqlQuery = "SELECT firstname, surname FROM User WHERE department_id = (SELECT department_id FROM User WHERE username = '" + username + "')";
 		List<Person> usernames = jdbcTemplate.query(sqlQuery, new PersonMapper());
 		return usernames;
 	}
 	
-	public int getDepartmentLimitFromUserID(int userid) {
-		String sqlQuery = "SELECT limit_absence FROM Department WHERE id = (SELECT department_id FROM User WHERE id = " + userid  + ")";
+	public int getDepartmentLimitFromUsername(String username) {
+		String sqlQuery = "SELECT limit_absence FROM Department WHERE id = (SELECT department_id FROM User WHERE username = '" + username  + "')";
 		return jdbcTemplate.queryForObject(sqlQuery, int.class);
-		//List<Integer> departmentlimit = jdbcTemplate.query(sqlQuery, new SQLResultInteger());
-		//return departmentlimit.get(0).intValue();
 	}
 	
 	protected JdbcTemplate getJdbcTemplate() {

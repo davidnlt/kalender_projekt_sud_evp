@@ -67,4 +67,10 @@ public class AuthController {
 				
 	}
 	
+	//Aufgaben für Heute
+	// Neue Methode Benutzerdaten ändern
+	// Neue Methode Passwort vergessen
+	// Entry Model und Entry Mapper anpassen
+	// Neues Dto für das Hinzufügen und Updaten eines Eintrags
+	
 }
