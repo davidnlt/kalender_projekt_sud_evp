@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 
 /**
  * @author busch
+ * 
+ * Class to represent the database table "User"
  *
  */
 @Entity
@@ -41,6 +43,7 @@ public class UserTable {
 	@Column(name="password", length=255, nullable=false, unique=false)
 	private String password;
 	
+	
 	public UserTable() {
 		this("", "", 0, "", "");
 	}
@@ -65,7 +68,7 @@ public class UserTable {
 		this.password = password;
 	}
 	
-	
+	//Getter - / Setter - Methods
 	public Integer getId() {
 		return id;
 	}	

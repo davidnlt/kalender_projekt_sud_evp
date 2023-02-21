@@ -7,6 +7,8 @@ import java.sql.Date;
 
 /**
  * @author busch
+ * 
+ * Data Transfer Object for inserting/changing entry information
  *
  */
 public class EntryDto {

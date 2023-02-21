@@ -26,8 +26,10 @@ import sud_evp.dto.UserEditDto;
 import sud_evp.repository.UserRepository;
 
 /**
- * @author busch
- *
+ * @author busch / kirsche
+ * 
+ * REST controller for user credentials
+ * 
  */
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -42,6 +44,11 @@ public class AuthController {
 	private JWTTokenGenerator jwtTokenGenerator;
 	
 	/*
+	 * Method to register a User to the Database
+	 * 
+	 * @param JSON-File with the following format: {"username":"", "password":"", "firstname":"", "surname":"", "department_id":""}
+	 * 
+	 * @return Returns Message with a Http-Status if the User was created or not.
 	 * 
 	 */
 	@PostMapping("/register")
@@ -59,6 +66,11 @@ public class AuthController {
 	}
 	
 	/*
+	 * Method to login the User
+	 * 
+	 * @param JSON-File with the following format: {"username":"", "password":""}
+	 * 
+	 * @return Returns Message with a Http-Status if the User username with password can be found in the database
 	 * 
 	 */
 	@PostMapping("/login")
@@ -70,6 +82,9 @@ public class AuthController {
 	}
 	
 	/*
+	 * Mapping for a logged-in User to change its firstname, surname or password
+	 * 
+	 * @param JSON-File with the following format: {"firstname":"", "surname":"", "password":""}
 	 * 
 	 */
 	@PostMapping("/user/update")
@@ -80,7 +95,4 @@ public class AuthController {
 		user.setPassword(passwordEncoder.encode(userInformation.getPassword()));
 		userRepository.save(user);
 	}
-	
-	// Aufgaben für Heute
-	// Neue Methode Passwort vergessen	
 }

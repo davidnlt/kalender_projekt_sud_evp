@@ -5,6 +5,8 @@ package sud_evp.dto;
 
 /**
  * @author busch
+ * 
+ * Data Transfer Object to export the access token
  *
  */
 public class AuthResponseDto {

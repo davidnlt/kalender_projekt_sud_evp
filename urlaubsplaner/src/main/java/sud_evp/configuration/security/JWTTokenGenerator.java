@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JWTTokenGenerator {
 	
-	public static final long JWT_TOKEN_EXPIRATION = 700000000;
+	private static final long JWT_TOKEN_EXPIRATION = 86400000; // 1 Day
 	private SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 	
 	public String generateToken(Authentication authentication) {

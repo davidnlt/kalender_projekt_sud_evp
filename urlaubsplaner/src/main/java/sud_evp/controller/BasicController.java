@@ -26,7 +26,7 @@ import sud_evp.dto.EntryDto;
 import sud_evp.dto.PersonNameDto;
 
 /**
- * @author busch
+ * @author busch / kirsche
  *
  */
 @CrossOrigin(origins = "http://localhost:3000")
@@ -49,8 +49,8 @@ public class BasicController {
 	/*
 	 * 
 	 */
-	@GetMapping("/dataallentries")
-	public List<Entry> getEntries(@RequestHeader("Authorization") String bearertoken) {
+	@GetMapping("/alldataentries")
+	public List<Entry> getAllEntries(@RequestHeader("Authorization") String bearertoken) {
 		return this.databaseHandler.selectAllEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));
 	}
 	
@@ -82,7 +82,7 @@ public class BasicController {
 		if (!this.databaseHandler.checkDaysRemaining(username, newEntry)) {
 			return new ResponseEntity<>("Nicht genügend Urlaubstage vorhanden.\n" +
 										"Rest: " + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + "\n" +
-										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(username, newEntry), HttpStatus.BAD_REQUEST);
+										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(newEntry), HttpStatus.BAD_REQUEST);
 		}
 		if (this.databaseHandler.checkDeparmentLimit(username, newEntry)){
 			return new ResponseEntity<>("Fehler, Abwesendheitslimit der Abteilung von " + this.databaseHandler.getDepartmentLimitFromUsername(username) + "% erreicht.", HttpStatus.BAD_REQUEST);
@@ -104,7 +104,7 @@ public class BasicController {
 		if (!this.databaseHandler.checkDaysRemaining(username, updatedEntry)) {
 			return new ResponseEntity<>("Nicht genügend Urlaubstage vorhanden.\n" +
 										"Rest: " + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + "\n" +
-										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(username,updatedEntry), HttpStatus.BAD_REQUEST);
+										"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(updatedEntry), HttpStatus.BAD_REQUEST);
 		}
 		this.databaseHandler.updateEntry(username,updatedEntry);
 		this.databaseHandler.updateUserDays(username);

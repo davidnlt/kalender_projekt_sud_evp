@@ -20,7 +20,9 @@ import sud_evp.dto.PersonNameDto;
 
 
 /**
- * @author busch
+ * @author busch / kirsche
+ *
+ * Database handler to execute sql-statements with jdbc template
  *
  */
 @Repository("databaseHandler")
@@ -30,7 +32,13 @@ public class DatabaseHandler {
 	private JdbcTemplate jdbcTemplate;
 	
 	/*
+	 * Get all holiday entries, which affect one specific month in a year, for all users of the same department of the logged in user
 	 * 
+	 * @param username - username of the user
+	 * @param year - year
+	 * @param month - month
+	 * 
+	 * @return List of all entries a month of a year
 	 */
 	public List<Entry> selectEntries(String username, int year, int month) {
 		String startdate = "'" + year + "-" + month + "-" + "01'";
@@ -47,7 +55,11 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Get all holiday entries, for all users of the same department with their names, of the logged in user
 	 * 
+	 * @param username - username of the user
+	 * 
+	 * @return List of all holiday entries
 	 */
 	public List<Entry> selectAllEntries(String username) {
 		String sqlQuery = "SELECT u.firstname, u.surname, he.entry_id, he.startdate, he.enddate, he.holidays_entry FROM HolidayEntry AS he "
@@ -59,6 +71,12 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Calls a function on the SQL-Server to check if the absense limit is going to up passed with the new entry
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return true or false if the limit has been exceeded
 	 * 
 	 */
 	public boolean checkDeparmentLimit(String username, EntryDto Entry) {
@@ -68,34 +86,62 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Calculates if the user if the new/updated holiday entry has more days than the user has remaining
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return true of false if the remaining days are enough
 	 * 
 	 */
 	public boolean checkDaysRemaining(String username, EntryDto Entry) {
-		int workdaysEntry = calculateWorkdays(username, Entry);
-		int workdaysOldEntry = (Entry.getEntry_id() != 0) ? calculateWorkdays(username, getEntry(username, Entry.getEntry_id())) : 0;
+		int workdaysEntry = calculateWorkdays( Entry);
+		int workdaysOldEntry = (Entry.getEntry_id() != 0) ? calculateWorkdays(getEntry(username, Entry.getEntry_id())) : 0;
 		List<Person> user = getUserInfo(username);
 		return (user.get(0).getHolidays_remaining() >= (workdaysEntry - workdaysOldEntry));
 	}
 	
 	/*
+	 * Get one specific entry of a user
+	 * 
+	 * @param username - username of the user
+	 * @param entryid - id for the holiday entry
+	 * 
+	 * @return Returns a entrydto of the entry
 	 * 
 	 */
 	public EntryDto getEntry(String username, int entryid){
 		String sqlQuery = "SELECT * FROM HolidayEntry WHERE user_id = (SELECT u.id FROM User AS u WHERE u.username = '" + username + "') AND entry_id = " + entryid;
 		List<Entry> entry = jdbcTemplate.query(sqlQuery, new EntryMapper());
-		EntryDto returnEntry = new EntryDto(entry.get(0).getEntry_id(), entry.get(0).getStartdate(), entry.get(0).getEnddate());
-		return returnEntry;
+		if (entry.size() > 0) {
+			return new EntryDto(entry.get(0).getEntry_id(), entry.get(0).getStartdate(), entry.get(0).getEnddate());
+		} else {
+			return new EntryDto();
+		}
 	}
 	
 	/*
+	 * Calls SQL-function to calculate the count of workdays between 2 days. Saturdays and Sundays are not counted as workdays.
+	 * National holidays are being ignored.
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return Returns the calculated number of workdays
 	 * 
 	 */
-	public int calculateWorkdays(String username, EntryDto Entry) {
+	public int calculateWorkdays(EntryDto Entry) {
 		String sqlQuery = "SELECT f_CalculateWorkdays('" + Entry.getStartdate() + "','" + Entry.getEnddate() + "')";
 		return jdbcTemplate.queryForObject(sqlQuery, int.class);
 	}
 	
 	/*
+	 * Checks if there is another holiday entry for the user, which would overlap with the new/updated entry
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return Overlap exists or not
 	 * 
 	 */
 	public boolean checkEntryOverlap(String username, EntryDto Entry) {
@@ -110,6 +156,10 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Create a new holiday entry of the database for a user
+	 * 
+	 * @param username - username of the user
+	 * @param newEntry - information about the new holiday entry
 	 * 
 	 */
 	public void insertEntry(String username, EntryDto newEntry) {
@@ -119,28 +169,39 @@ public class DatabaseHandler {
 							   + "?,"
 							   + "?,"
 							   + "?)";
-		this.jdbcTemplate.update(sqlQuery, username, username, newEntry.getStartdate(), newEntry.getEnddate(), calculateWorkdays(username, newEntry));
+		this.jdbcTemplate.update(sqlQuery, username, username, newEntry.getStartdate(), newEntry.getEnddate(), calculateWorkdays(newEntry));
 	}
 	
 	/*
+	 * Updates the remaining holidays of a user
+	 * 
+	 * @param username - username of the user
 	 * 
 	 */
 	public void updateUserDays(String username) {
-		String sqlQuery = "UPDATE User SET holidays_remaining = holidays_total - (SELECT SUM(holidays_entry) FROM holidayentry WHERE user_id = id)  WHERE username = ?";
+		String sqlQuery = "UPDATE User SET holidays_remaining = holidays_total - (SELECT IFNULL(SUM(holidays_entry),0) FROM holidayentry WHERE user_id = id)  WHERE username = ?";
 		this.jdbcTemplate.update(sqlQuery, username);
 	}
 	
 	/*
+	 * Updates a holiday entry with the new information
+	 * 
+	 * @param username - username of the user
+	 * @param updatedEntry - information of the updated holiday entry
 	 * 
 	 */
 	public void updateEntry(String username, EntryDto updatedEntry) {
 		String sqlQuery = "UPDATE HolidayEntry SET startdate = ?, enddate = ?, " +
-						  "holidays_entry = '" + calculateWorkdays(username, updatedEntry) +"' " + 
+						  "holidays_entry = '" + calculateWorkdays(updatedEntry) +"' " + 
 						  "WHERE user_id = (SELECT u.id FROM User AS u WHERE u.username = ?) AND entry_id = ?";
 		this.jdbcTemplate.update(sqlQuery, updatedEntry.getStartdate(), updatedEntry.getEnddate(), username, updatedEntry.getEntry_id());
 	}
 	
 	/*
+	 * Deletes a holiday entry from the database
+	 * 
+	 * @param username - username of the user
+	 * @param entryid - id of the holiday entry of the user which gets deleted
 	 * 
 	 */
 	public void deleteEntry(String username, int entryid) {
@@ -149,6 +210,11 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Gets the user information from the database
+	 * 
+	 * @param username - username of the user
+	 * 
+	 * @return Person object of the user 
 	 * 
 	 */
 	public List<Person> getUserInfo(String username) {
@@ -158,6 +224,11 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Gets the user names of the department
+	 *
+	 *@param username - username of the user
+	 *
+	 *@return usernames
 	 * 
 	 */
 	public List<PersonNameDto> getDepartmentUserNames(String username){
@@ -167,6 +238,11 @@ public class DatabaseHandler {
 	}
 	
 	/*
+	 * Gets the Limit of the Department from the Username
+	 * 
+	 * @param username - username of the user
+	 * 
+	 * @return absence limit of the department for the user
 	 * 
 	 */
 	public int getDepartmentLimitFromUsername(String username) {

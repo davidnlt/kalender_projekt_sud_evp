@@ -13,6 +13,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author busch
+ * 
+ * Configuration class for the MySQL Connection
  *
  */
 @Configuration
@@ -28,8 +30,7 @@ public class MySQLConfiguration {
 
 	
 	/**
-	 * The Data Source Object for the configuration and connection to the MySQL
-	 * Database.
+	 * The Data Source Object for the configuration and connection to the MySQL Database.
 	 * 
 	 * @return The generated Datasource Object.
 	 */

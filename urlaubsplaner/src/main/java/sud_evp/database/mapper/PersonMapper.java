@@ -12,6 +12,9 @@ import sud_evp.database.model.Person;
 
 /**
  * @author busch
+ * 
+ * This class maps a result object from the jdbc connector to a java object.
+ * Not all columns are included in the result set.
  *
  */
 public class PersonMapper implements RowMapper<Person>{

@@ -1,26 +1,25 @@
-CREATE DATABASE holidayplanning;
-USE holidayplanning;
+//CREATE DATABASE holidayplanning;
+//USE holidayplanning;
 
-CREATE USER 'dbuser'@'%' IDENTIFIED BY 'fia001';
-GRANT SELECT,INSERT,UPDATE,DELETE,EXECUTE ON holidayplanning.* TO 'dbuser'@'%'; 
-FLUSH PRIVILEGES;
-
+//CREATE USER 'dbuser'@'%' IDENTIFIED BY 'fia001';
+//GRANT SELECT,INSERT,UPDATE,DELETE,EXECUTE ON holidayplanning.* TO 'dbuser'@'%'; 
+//FLUSH PRIVILEGES;
 CREATE TABLE Department(
 	id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     limit_absence INT NOT NULL
 );
 
-CREATE TABLE User(
+CREATE TABLE user(
 	id INT AUTO_INCREMENT PRIMARY KEY,
     firstname VARCHAR(255) NOT NULL,
     surname VARCHAR(255) NOT NULL,
     department_id INT NOT NULL,
     holidays_total INT NOT NULL,
-    holidays_remaning INT NOT NULL,
-    username VARCHAR(255),
-    password VARCHAR(255),
-    CONSTRAINT FK_Department FOREIGN KEY (department_id) REFERENCES Department(id)
+    holidays_remaining INT NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+	CONSTRAINT FK_Department FOREIGN KEY (department_id) REFERENCES Department(id)
 );
 
 CREATE TABLE HolidayEntry(
@@ -33,7 +32,7 @@ CREATE TABLE HolidayEntry(
     CONSTRAINT FK_User FOREIGN KEY (user_id) REFERENCES User(id)
 );
 
-SET GLOBAL log_bin_trust_function_creators = 1;
+/*SET GLOBAL log_bin_trust_function_creators = 1;
 
 DROP function IF EXISTS `f_CalculateWorkdays`;
 DELIMITER $$
@@ -65,5 +64,5 @@ BEGIN
 	END IF;	
 END;
 $$
-DELIMITER ;
+DELIMITER ;*/;
     

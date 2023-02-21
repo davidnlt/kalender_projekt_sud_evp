@@ -18,11 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import sud_evp.configuration.security.JWTAuthenticationFilter;
 import sud_evp.configuration.security.JwtAuthEntryPoint;
-import sud_evp.service.CustomerUserDetailsService;
-
 
 /**
  * @author busch
+ * 
+ * Configuration of the authentication process
  *
  */
 @Configuration
@@ -30,8 +30,6 @@ import sud_evp.service.CustomerUserDetailsService;
 public class SecurityConfiguration{
 	@Autowired
 	private JwtAuthEntryPoint authEntryPoint;
-	@Autowired
-	private CustomerUserDetailsService userDetailsService;
 	
 	@Bean
 	public SecurityFilterChain filterchain(HttpSecurity http) throws Exception{

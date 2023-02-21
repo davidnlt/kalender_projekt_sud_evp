@@ -4,7 +4,9 @@
 package sud_evp.dto;
 
 /**
- * @author busch
+ * @author busch / kirsche
+ * 
+ * Data Transfer Object for Login
  *
  */
 public class LoginDto {

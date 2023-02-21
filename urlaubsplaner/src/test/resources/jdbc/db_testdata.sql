@@ -1,18 +1,17 @@
-#Departments
+//Departments;
 INSERT INTO Department VALUES(1, 'Anwendungsenteicklung', 60);
 INSERT INTO Department VALUES(2, 'Systemintegration', 50);
 
-#User
-INSERT INTO User VALUES(1,'Kevin','Busch',1,30,30,NULL,NULL);
-INSERT INTO User VALUES(2,'David','Nolte',1,35,35,NULL,NULL);
-INSERT INTO User VALUES(3,'Kevin','Kirsch',1,33,33,NULL,NULL);
-INSERT INTO User VALUES(4,'Max','Mustermann',1,30,30,NULL,NULL);
-INSERT INTO User VALUES(5,'Test','Person',1,25,5,NULL,NULL);
-INSERT INTO User VALUES(6,'SYS1','SYS1',2,30,0,NULL,NULL);
-INSERT INTO User VALUES(7,'SYS2','SYS2',2,30,0,NULL,NULL);
-INSERT INTO User VALUES(8,'SYS3','SYS3',2,30,0,NULL,NULL);
-INSERT INTO User VALUES(9,'SYS4','SYS4',2,30,0,NULL,NULL);
-INSERT INTO User VALUES(10,'Holger','Bieber',2,40,0,NULL,NULL);
+//User;
+INSERT INTO User VALUES (1, 'Kevin', 'Busch', 1, 30, 25, 'user1', 'user1');
+INSERT INTO User VALUES (2, 'David', 'Nolte', 1, 30, 20, 'user2', 'user2');
+INSERT INTO User VALUES (3, 'Kevin', 'Kirsch', 1, 30, 15, 'user3', 'user3');
+INSERT INTO User VALUES (4, 'Max', 'Mustermann', 1, 30, 30, 'user4', 'user4');
+INSERT INTO User VALUES (5, 'Hallo', 'Welt', 1, 30, 30, 'user5', 'user5');
 
-#HolidayEntries
-INSERT INTO HolidayEntry VALUES(5,1,'2023-01-02', '2023-01-06',5);
+//HolidayEntries;
+INSERT INTO HolidayEntry VALUES (1, 1, '2023-01-02', '2023-01-06', 5);
+INSERT INTO HolidayEntry VALUES (2, 1, '2023-01-02', '2023-01-06', 5);
+INSERT INTO HolidayEntry VALUES (3, 1, '2023-01-02', '2023-01-13', 10);
+INSERT INTO HolidayEntry VALUES (2, 2, '2023-02-20', '2023-02-24', 5);
+INSERT INTO HolidayEntry VALUES (3, 2, '2023-01-30', '2023-02-03', 5);
