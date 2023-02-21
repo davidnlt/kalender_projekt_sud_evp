@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import sud_evp.configuration.security.JWTAuthenticationFilter;
+import sud_evp.configuration.security.JwtAuthEntryPoint;
 import sud_evp.service.CustomerUserDetailsService;
 
 

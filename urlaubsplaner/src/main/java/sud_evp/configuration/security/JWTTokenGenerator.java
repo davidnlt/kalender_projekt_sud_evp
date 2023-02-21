@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sud_evp.configuration;
+package sud_evp.configuration.security;
 
 import java.util.Date;
 
@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JWTTokenGenerator {
 	
-	public static final long JWT_TOKEN_EXPIRATION = 70000;
+	public static final long JWT_TOKEN_EXPIRATION = 700000000;
 	private SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 	
 	public String generateToken(Authentication authentication) {
@@ -37,7 +37,6 @@ public class JWTTokenGenerator {
 				.setExpiration(expireDate)
 				.signWith(secret)
 				.compact();
-		System.out.println(token);
 		return token;
 	}
 	

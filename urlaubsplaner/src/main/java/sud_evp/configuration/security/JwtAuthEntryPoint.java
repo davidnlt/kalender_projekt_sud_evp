@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sud_evp.configuration;
+package sud_evp.configuration.security;
 
 import java.io.IOException;
 

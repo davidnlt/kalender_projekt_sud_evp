@@ -14,13 +14,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import sud_evp.configuration.JWTTokenGenerator;
+import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.model.UserTable;
 import sud_evp.dto.AuthResponseDto;
 import sud_evp.dto.LoginDto;
 import sud_evp.dto.RegisterDto;
+import sud_evp.dto.UserEditDto;
 import sud_evp.repository.UserRepository;
 
 /**
@@ -30,47 +32,55 @@ import sud_evp.repository.UserRepository;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class AuthController {
+	@Autowired
 	private AuthenticationManager authenticationManager;
+	@Autowired
 	private UserRepository userRepository;
+	@Autowired
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private JWTTokenGenerator jwtTokenGenerator;
 	
-	@Autowired
-	public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-		this.authenticationManager = authenticationManager;
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-	}
-	
+	/*
+	 * 
+	 */
 	@PostMapping("/register")
 	public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
 		if (userRepository.existsByUsername(registerDto.getUsername())) {
 			return new ResponseEntity<>("Username " +  registerDto.getUsername()  + " existiert bereits", HttpStatus.BAD_REQUEST);
 		}
 		UserTable newUser = new UserTable(registerDto.getFirstname(), 
-								registerDto.getSurname(), 
-								registerDto.getDepartment_id(), 
-								registerDto.getUsername(), 
-								passwordEncoder.encode(registerDto.getPassword()));
-		userRepository.save(newUser);
-		
+										  registerDto.getSurname(), 
+									  	  registerDto.getDepartment_id(), 
+									  	  registerDto.getUsername(), 
+									  	  passwordEncoder.encode(registerDto.getPassword()));
+		userRepository.save(newUser);		
 		return new ResponseEntity<>("Registrierung erfolgreich", HttpStatus.OK);
 	}
 	
+	/*
+	 * 
+	 */
 	@PostMapping("/login")
 	public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto){
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String token = jwtTokenGenerator.generateToken(authentication);
-		return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
-				
+		return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);	
 	}
 	
-	//Aufgaben für Heute
-	// Neue Methode Benutzerdaten ändern
-	// Neue Methode Passwort vergessen
-	// Entry Model und Entry Mapper anpassen
-	// Neues Dto für das Hinzufügen und Updaten eines Eintrags
+	/*
+	 * 
+	 */
+	@PostMapping("/user/update")
+	public void updateUserInformation(@RequestHeader("Authorization") String bearertoken, @RequestBody UserEditDto userInformation){
+		UserTable user = userRepository.findByUsername(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken)).orElseThrow();
+		user.setFirstname(userInformation.getFirstname());
+		user.setSurname(userInformation.getSurname());
+		user.setPassword(passwordEncoder.encode(userInformation.getPassword()));
+		userRepository.save(user);
+	}
 	
+	// Aufgaben für Heute
+	// Neue Methode Passwort vergessen	
 }

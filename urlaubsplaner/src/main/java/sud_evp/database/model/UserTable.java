@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 /**
  * @author busch
@@ -32,10 +31,8 @@ public class UserTable {
 	@Column(name="department_id", nullable=false, unique=false)
 	private int department_id;
 	
-	@Transient
 	private int holidays_total;
 	
-	@Transient
 	private int holidays_remaining;
 	
 	@Column(name="username", length=255, nullable=false, unique=true)
