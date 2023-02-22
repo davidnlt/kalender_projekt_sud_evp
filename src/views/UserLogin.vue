@@ -26,7 +26,9 @@
                     v-model="password"
                     name="password"
                     label="Passwort"
-                    type="password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show1 ? 'text' : 'password'"
+                    @click:append="show1 = !show1"
                     color="black"
                     prepend-inner-icon="mdi-lock"
                     :rules="rules"
@@ -34,22 +36,85 @@
                     rounded
                   ></v-text-field>
 
-                  <v-btn type="submit" x-large block dark rounded
+                  <v-btn type="submit" x-large block dark rounded class="mb-2"
                     >Anmelden</v-btn
                   >
 
-                  <v-col class="text-left">
-                    <v-btn large rounded> Passwort vergessen? </v-btn>
-                  </v-col>
+                  <v-row>
+                    <v-dialog v-model="dialog" persistent width="600">
+                      <template v-slot:activator="{ props }">
+                        <v-col class="text-left">
+                          <v-btn
+                            @click="dialog = true"
+                            v-bind="props"
+                            color="black"
+                            text
+                            rounded
+                            >Passwort vergessen?
+                          </v-btn>
+                        </v-col>
+                        <v-col class="text-right">
+                          <v-btn
+                            to="/registration"
+                            large
+                            color="black"
+                            text
+                            rounded
+                          >
+                            Registrieren
+                          </v-btn>
+                        </v-col>
+                      </template>
+                      <v-card>
+                        <v-card-title>
+                          <span class="text-h5"> Passwort zurücksetzen </span>
+                        </v-card-title>
+                        <v-card-text>
+                          <v-container>
+                            <form ref="form" @submit.prevent="register()">
+                              <p>
+                                Bitte gib deine E-Mail-Adresse ein. So können
+                                wir dir einen Link zum Zurücksetzen schicken.
+                              </p>
 
-                  <v-divider></v-divider>
-
-                  <v-col class="text-center">
-                    <h1>Ich bin neu hier!</h1>
-                    <v-btn to="/registration" large rounded>
-                      Registrieren
-                    </v-btn>
-                  </v-col>
+                              <v-text-field
+                                v-model="email"
+                                name="email"
+                                label="E-Mail-Adresse"
+                                type="email"
+                                color="black"
+                                outlined
+                                rounded
+                              ></v-text-field>
+                              <v-row
+                                ><v-col
+                                  ><v-btn
+                                    @click="dialog = false"
+                                    large
+                                    dark
+                                    rounded
+                                  >
+                                    Schließen
+                                  </v-btn></v-col
+                                >
+                                <v-col
+                                  ><v-btn
+                                    type="submit"
+                                    @click="dialog = false"
+                                    large
+                                    dark
+                                    rounded
+                                  >
+                                    Link zum Zurücksetzen erhalten
+                                  </v-btn></v-col
+                                >
+                              </v-row>
+                            </form>
+                          </v-container>
+                        </v-card-text>
+                      </v-card>
+                    </v-dialog>
+                  </v-row>
                 </form>
               </v-card-text>
             </v-card>
@@ -68,32 +133,40 @@ export default {
     return {
       username: "",
       password: "",
+      email: "",
+      show1: false,
       rules: [
         (value) => {
           if (value) return true;
-          return "Füllen Sie dieses Feld aus.";
+          return "Dies ist ein Pflichtfeld";
         },
       ],
-      data: null,
+      data: "",
+      dialog: false,
     };
   },
   methods: {
     async login() {
-      //await axios
-      //  .get("http://localhost:8080/userinfo")
-      //  .then((response) => {
-      //    this.data = response.data;
-      //  })
-      //  .catch((error) => console.log(error));
+      //console.log(this.username.substr(0, 2));
+      const json = JSON.stringify({
+        username: `${this.username}`,
+        password: `${this.password}`,
+      });
       await axios
-        .get(
-          `http://localhost:8080/login?benutzername=${this.benutzername}&passwort=${this.passwort}`
-        )
-        .then((response) => {
-          this.data = response.data;
+        .post("http://localhost:8080/login", json, {
+          headers: { "content-type": "application/json" },
         })
-        .catch((error) => console.log(error));
-      localStorage.setItem("user", this.data);
+        .then((response) => {
+          console.log(response);
+          localStorage.setItem("AccessToken", response.data.accessToken);
+          localStorage.setItem("Username", this.username);
+          localStorage.setItem("Password", this.password);
+          this.$router.push({ name: "VacationCalendar" });
+        })
+        .catch((error) => {
+          console.log(error);
+          console.log(error.response.data.message);
+        });
     },
   },
 };

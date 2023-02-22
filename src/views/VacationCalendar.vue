@@ -11,6 +11,7 @@
                 class="me-4"
                 color="grey-darken-2"
                 @click="setToday"
+                rounded
               >
                 Heute
               </v-btn>
@@ -20,27 +21,17 @@
               <v-btn fab small color="grey-darken" @click="next">
                 <v-icon size="small"> mdi-chevron-right </v-icon>
               </v-btn>
-              <v-toolbar-title v-if="$refs.calendar">
+              <v-toolbar-title v-if="$refs.calendar" class="ml-4">
                 {{ $refs.calendar.title }}
               </v-toolbar-title>
               <v-spacer></v-spacer>
-              <v-menu location="bottom end">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    variant="outlined"
-                    color="grey-darken-2"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <span>{{ typeToLabel[type] }}</span>
-                    <v-icon end> mdi-menu-down </v-icon>
-                  </v-btn>
-                </template>
-              </v-menu>
+              <v-btn rounded color="primary"
+                >Zur Verfügung stehende Urlaubstage:
+              </v-btn>
 
-              <v-dialog v-model="dialog" persistent width="1024">
+              <v-dialog v-model="dialog" persistent width="500">
                 <template v-slot:activator="{ props }">
-                  <v-btn @click="dialog = true" v-bind="props">
+                  <v-btn @click="dialog = true" v-bind="props" rounded>
                     Urlaubseintrag hinzufügen
                   </v-btn>
                 </template>
@@ -50,76 +41,126 @@
                   </v-card-title>
                   <v-card-text>
                     <v-container>
-                      <form ref="form" @submit.prevent="register()">
-                        <v-text-field
-                          v-model="vorname"
-                          name="vornme"
-                          label="Vorname"
-                          type="text"
-                          color="black"
-                          :rules="rules"
-                          outlined
-                          rounded
-                        ></v-text-field>
+                      <form ref="form" @submit.prevent="addVacationEntry()">
+                        <v-row>
+                          <v-col cols="12" lg="6">
+                            <v-menu
+                              ref="startdate_picker"
+                              v-model="startdate_picker"
+                              :close-on-content-click="false"
+                              :return-value.sync="vacationStartDate"
+                              transition="scale-transition"
+                              offset-y
+                              min-width="auto"
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="vacationStartDate"
+                                  label="Startdatum"
+                                  prepend-icon="mdi-calendar"
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                v-model="vacationStartDate"
+                                no-title
+                                scrollable
+                              >
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                  text
+                                  color="primary"
+                                  @click="startdate_picker = false"
+                                  rounded
+                                >
+                                  Abbrechen
+                                </v-btn>
+                                <v-btn
+                                  text
+                                  color="primary"
+                                  @click="
+                                    $refs.startdate_picker.save(
+                                      vacationStartDate
+                                    )
+                                  "
+                                  rounded
+                                >
+                                  OK
+                                </v-btn>
+                              </v-date-picker>
+                            </v-menu>
+                          </v-col>
 
-                        <v-text-field
-                          v-model="nachname"
-                          name="nachname"
-                          label="Nachname"
-                          type="text"
-                          color="black"
-                          :rules="rules"
-                          outlined
-                          rounded
-                        ></v-text-field>
-
-                        <v-text-field
-                          v-model="abteilung"
-                          name="abteilung"
-                          label="Abteilung"
-                          type="text"
-                          color="black"
-                          :rules="rules"
-                          outlined
-                          rounded
-                        ></v-text-field>
-
-                        <v-text-field
-                          v-model="username"
-                          name="username"
-                          label="Benutzername"
-                          type="text"
-                          color="black"
-                          :rules="rules"
-                          outlined
-                          rounded
-                        ></v-text-field>
-
-                        <v-text-field
-                          v-model="password"
-                          name="password"
-                          label="Passwort"
-                          type="password"
-                          color="black"
-                          :rules="rules"
-                          outlined
-                          rounded
-                        ></v-text-field>
-                        <v-btn
-                          color="blue-darken-1"
-                          variant="text"
-                          @click="dialog = false"
+                          <v-col cols="12" lg="6">
+                            <v-menu
+                              ref="enddate_picker"
+                              v-model="enddate_picker"
+                              :close-on-content-click="false"
+                              :return-value.sync="vacationEndDate"
+                              transition="scale-transition"
+                              offset-y
+                              min-width="auto"
+                            >
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-text-field
+                                  v-model="vacationEndDate"
+                                  label="Enddatum"
+                                  prepend-icon="mdi-calendar"
+                                  readonly
+                                  v-bind="attrs"
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                v-model="vacationEndDate"
+                                no-title
+                                scrollable
+                              >
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                  text
+                                  color="primary"
+                                  @click="enddate_picker = false"
+                                  rounded
+                                >
+                                  Abbrechen
+                                </v-btn>
+                                <v-btn
+                                  text
+                                  color="primary"
+                                  @click="
+                                    $refs.enddate_picker.save(vacationEndDate)
+                                  "
+                                  rounded
+                                >
+                                  OK
+                                </v-btn>
+                              </v-date-picker>
+                            </v-menu>
+                          </v-col>
+                        </v-row>
+                        <v-row
+                          ><v-col class="text-left"
+                            ><v-btn
+                              variant="text"
+                              @click="dialog = false"
+                              rounded
+                            >
+                              Schließen
+                            </v-btn></v-col
+                          ><v-col class="text-right"
+                            ><v-btn
+                              type="submit"
+                              variant="text"
+                              @click="dialog = false"
+                              rounded
+                            >
+                              Hinzufügen
+                            </v-btn></v-col
+                          ></v-row
                         >
-                          Schließen
-                        </v-btn>
-                        <v-btn
-                          type="submit"
-                          color="blue-darken-1"
-                          variant="text"
-                          @click="dialog = false"
-                        >
-                          Hinzufügen
-                        </v-btn>
                       </form>
                     </v-container>
                   </v-card-text>
@@ -134,10 +175,8 @@
               color="primary"
               :events="events"
               :event-color="getEventColor"
-              :type="type"
+              type="month"
               @click:event="showEvent"
-              @click:more="viewDay"
-              @click:date="viewDay"
               @change="updateRange"
             ></v-calendar>
             <v-menu
@@ -146,32 +185,23 @@
               :activator="selectedElement"
               offset-x
             >
-              <v-card color="grey-lighten-4" min-width="350px" flat>
+              <v-card min-width="350px" flat>
                 <v-toolbar :color="selectedEvent.color" dark>
-                  <v-btn icon>
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-toolbar-title
-                    v-html="selectedEvent.name"
-                  ></v-toolbar-title>
-                  <v-spacer></v-spacer>
-                  <v-btn icon>
-                    <v-icon>mdi-heart</v-icon>
-                  </v-btn>
-                  <v-btn icon>
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
+                  <v-tool-title> {{ selectedEvent.name }}</v-tool-title>
                 </v-toolbar>
                 <v-card-text>
-                  <span v-html="selectedEvent.details"></span>
-                </v-card-text>
+                  Von {{ selectedEvent.start }} bis
+                  {{ selectedEvent.end }}</v-card-text
+                >
                 <v-card-actions>
-                  <v-btn
-                    variant="text"
-                    color="secondary"
-                    @click="selectedOpen = false"
-                  >
-                    Cancel
+                  <v-btn variant="text" @click="selectedOpen = false" rounded>
+                    Schließen
+                  </v-btn>
+                  <v-btn variant="text" @click="selectedOpen = false" rounded>
+                    Löschen
+                  </v-btn>
+                  <v-btn variant="text" @click="selectedOpen = false" rounded>
+                    Änderung speichern
                   </v-btn>
                 </v-card-actions>
               </v-card>
@@ -187,6 +217,7 @@
 <script>
 import CalendarHeader from "../components/CalendarHeader.vue";
 import CalendarFooter from "../components/CalendarFooter.vue";
+//import axios from "axios";
 
 export default {
   name: "VacationCalendar",
@@ -196,7 +227,6 @@ export default {
   },
   data: () => ({
     focus: "",
-    type: "month",
     selectedEvent: {},
     selectedElement: null,
     selectedOpen: false,
@@ -210,29 +240,40 @@ export default {
       "orange",
       "grey darken-1",
     ],
-    names: ["Urlaub"],
     dialog: false,
+    vacationStartDate: new Date(
+      Date.now() - new Date().getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .substr(0, 10),
+    vacationEndDate: new Date(
+      Date.now() - new Date().getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .substr(0, 10),
+    startdate_picker: false,
+    enddate_picker: false,
   }),
   mounted() {
     this.$refs.calendar.checkChange();
   },
   methods: {
-    viewDay({ date }) {
-      this.focus = date;
-      this.type = "day";
-    },
     getEventColor(event) {
       return event.color;
     },
+
     setToday() {
       this.focus = "";
     },
+
     prev() {
       this.$refs.calendar.prev();
     },
+
     next() {
       this.$refs.calendar.next();
     },
+
     showEvent({ nativeEvent, event }) {
       const open = () => {
         this.selectedEvent = event;
@@ -249,30 +290,24 @@ export default {
       }
       nativeEvent.stopPropagation();
     },
-    updateRange({ start, end }) {
+
+    updateRange() {
       const events = [];
-      const min = new Date(`${start.date}T00:00:00`);
-      const max = new Date(`${end.date}T23:59:59`);
-      const days = (max.getTime() - min.getTime()) / 86400000;
-      const eventCount = this.rnd(days, days + 20);
-      for (let i = 0; i < eventCount; i++) {
-        const allDay = this.rnd(0, 3) === 0;
-        const firstTimestamp = this.rnd(min.getTime(), max.getTime());
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000));
-        const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000;
-        const second = new Date(first.getTime() + secondTimestamp);
+
+      for (let i = 0; i < 2; i++) {
         events.push({
-          name: this.names[this.rnd(0, this.names.length - 1)],
-          start: first,
-          end: second,
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          timed: !allDay,
+          name: "Urlaub David Nolte",
+          start: "2023-02-20",
+          end: "2023-02-22",
+          color: "blue",
         });
       }
       this.events = events;
     },
-    rnd(a, b) {
-      return Math.floor((b - a + 1) * Math.random()) + a;
+
+    addVacationEntry() {
+      console.log(this.vacationStartDate);
+      console.log(this.vacationEndDate);
     },
   },
 };

@@ -8,12 +8,11 @@
               <div class="text-center">
                 <h1>Account erstellen</h1>
               </div>
-              <v-space></v-space>
               <v-card-text>
                 <form ref="form" @submit.prevent="register()">
                   <v-text-field
-                    v-model="vorname"
-                    name="vornme"
+                    v-model="firstname"
+                    name="firstname"
                     label="Vorname"
                     type="text"
                     color="black"
@@ -23,8 +22,8 @@
                   ></v-text-field>
 
                   <v-text-field
-                    v-model="nachname"
-                    name="nachname"
+                    v-model="surname"
+                    name="surname"
                     label="Nachname"
                     type="text"
                     color="black"
@@ -34,8 +33,8 @@
                   ></v-text-field>
 
                   <v-text-field
-                    v-model="abteilung"
-                    name="abteilung"
+                    v-model="department"
+                    name="department"
                     label="Abteilung"
                     type="text"
                     color="black"
@@ -59,21 +58,38 @@
                     v-model="password"
                     name="password"
                     label="Passwort"
-                    type="password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show1 ? 'text' : 'password'"
+                    @click:append="show1 = !show1"
                     color="black"
                     :rules="rules"
                     outlined
                     rounded
                   ></v-text-field>
 
-                  <v-btn type="submit" x-large block dark rounded class="mb-4"
+                  <v-text-field
+                    v-model="confirmPassword"
+                    name="confirmPassword"
+                    label="Passwort bestätigen"
+                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show2 ? 'text' : 'password'"
+                    @click:append="show2 = !show2"
+                    color="black"
+                    :rules="rules"
+                    outlined
+                    rounded
+                  ></v-text-field>
+
+                  <v-btn type="submit" x-large block dark rounded class="mb-2"
                     >Registrieren</v-btn
                   >
-                  <v-col class="text-right">
-                    <v-btn to="/login" large rounded>
-                      Hast du bereits einen Account?
-                    </v-btn>
-                  </v-col>
+                  <v-row>
+                    <v-col class="text-right">
+                      <v-btn to="/login" large color="black" text rounded>
+                        Hast du bereits einen Account?
+                      </v-btn>
+                    </v-col>
+                  </v-row>
                 </form>
               </v-card-text>
             </v-card>
@@ -91,32 +107,45 @@ export default {
   name: "UserRegistration",
   data() {
     return {
-      vorname: "",
-      nachname: "",
-      abteilung: "",
       username: "",
       password: "",
+      firstname: "",
+      surname: "",
+      department: "",
+      departmentId: "1",
+      confirmPassword: "",
+      show1: false,
+      show2: false,
       rules: [
         (value) => {
           if (value) return true;
-          return "Füllen Sie dieses Feld aus.";
+          return "Dies ist ein Pflichtfeld";
         },
       ],
     };
   },
   methods: {
     async register() {
-      await axios
-        .post("http://localhost:8080/UserRegistration", {
-          vorname: this.vorname,
-          nachname: this.nachname,
-          abteilung: this.abteilung,
-          benutzername: this.benutzername,
-          passwort: this.passwort,
-        })
-        .then((response) => console.log(response))
-        .catch((error) => console.log(error));
-      this.$router.push({ name: "VacationCalendar" });
+      if (this.password == this.confirmPassword) {
+        const json = JSON.stringify({
+          username: `${this.username}`,
+          password: `${this.password}`,
+          firstname: `${this.firstname}`,
+          surname: `${this.surname}`,
+          department_id: `${this.departmentId}`,
+        });
+        await axios
+          .post("http://localhost:8080/register", json, {
+            headers: { "content-type": "application/json" },
+          })
+          .then((response) => {
+            console.log(response);
+            this.$router.push({ name: "UserLogin" });
+          })
+          .catch((error) => console.log(error));
+      } else {
+        alert("Passwort stimmt nicht überein");
+      }
     },
   },
 };
