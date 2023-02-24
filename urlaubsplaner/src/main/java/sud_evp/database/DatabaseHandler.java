@@ -7,11 +7,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
+import sud_evp.database.mapper.DepartmentMapper;
 import sud_evp.database.mapper.EntryMapper;
 import sud_evp.database.mapper.PersonMapper;
 import sud_evp.database.mapper.PersonNamesMapper;
+import sud_evp.database.model.Department;
 import sud_evp.database.model.Entry;
 import sud_evp.database.model.Person;
 import sud_evp.dto.EntryDto;
@@ -25,7 +27,7 @@ import sud_evp.dto.PersonNameDto;
  * Database handler to execute sql-statements with jdbc template
  *
  */
-@Repository("databaseHandler")
+@Component("databaseHandler")
 public class DatabaseHandler {
 	
 	@Autowired
@@ -45,10 +47,10 @@ public class DatabaseHandler {
 		String sqlQuery = "SELECT u.firstname, u.surname, he.entry_id, he.startdate, he.enddate, he.holidays_entry FROM HolidayEntry AS he "
 						+ "LEFT JOIN User AS u "
 						+ "ON u.id = he.user_id "
-						+ "WHERE ((he.startdate<= " + startdate + "  AND he.enddate>= LAST_DAY(" + startdate + "))"
+						+ "WHERE ((he.startdate<= " + startdate + "  AND he.enddate>= " + startdate + ")"
 						+ " OR (he.startdate >= " + startdate + " AND he.enddate <= LAST_DAY(" + startdate + "))"
 						+ " OR (he.startdate <= " + startdate + " AND he.enddate >= LAST_DAY(" + startdate + "))"
-						+ " OR (he.startdate <= " + startdate + " AND he.enddate >= LAST_DAY(" + startdate + ")))"
+						+ " OR (he.startdate <= LAST_DAY(" + startdate + ") AND he.enddate >= LAST_DAY(" + startdate + ")))"
 						+ " AND u.department_id IN (SELECT department_id FROM User WHERE username = '" + username + "')";
 		List<Entry> entryList = jdbcTemplate.query(sqlQuery, new EntryMapper());
 		return entryList;
@@ -250,10 +252,19 @@ public class DatabaseHandler {
 		return jdbcTemplate.queryForObject(sqlQuery, int.class);
 	}
 	
-	protected JdbcTemplate getJdbcTemplate() {
+	/*
+	 * @return Returns a list of all departments on the sql database
+	 */
+	public List<Department> getDepartments(){
+		String sqlQuery = "SELECT * FROM Department";
+		List<Department> departments = jdbcTemplate.query(sqlQuery, new DepartmentMapper());
+		return departments;
+	}
+	
+	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
-	protected void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 

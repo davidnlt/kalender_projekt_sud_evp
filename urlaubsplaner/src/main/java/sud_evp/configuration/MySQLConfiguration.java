@@ -8,9 +8,11 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 /**
  * @author busch
  * 
@@ -18,6 +20,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  *
  */
 @Configuration
+//@EnableJpaRepositories(basePackages = {"sud_evp.repository"})
 public class MySQLConfiguration {
 	@Value("${spring.datasource.driver-class-name}")
 	private String database_driver;
@@ -27,7 +30,6 @@ public class MySQLConfiguration {
 	private String database_user;
 	@Value("${spring.datasource.password}")
 	private String database_password;
-
 	
 	/**
 	 * The Data Source Object for the configuration and connection to the MySQL Database.
@@ -42,7 +44,6 @@ public class MySQLConfiguration {
 		dataSource.setUrl(this.database_url);
 		dataSource.setUsername(this.database_user);
 		dataSource.setPassword(this.database_password);
-
 		return dataSource;
 	}
 

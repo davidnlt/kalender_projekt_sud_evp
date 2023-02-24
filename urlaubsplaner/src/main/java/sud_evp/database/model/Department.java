@@ -3,6 +3,8 @@
  */
 package sud_evp.database.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * @author busch
  *
@@ -10,6 +12,7 @@ package sud_evp.database.model;
 public class Department {
 	private int id;
 	private String name;
+	@JsonIgnore
 	private int limit_absence;
 	
 	public Department() {
@@ -19,7 +22,7 @@ public class Department {
 	public Department(int id, String name, int limit_absence) {
 		this.id = id;
 		this.name = name;
-		this.setLimit_absence(limit_absence);
+		this.limit_absence = limit_absence;
 	}
 
 	public int getId() {
@@ -44,6 +47,5 @@ public class Department {
 
 	public void setLimit_absence(int limit_absence) {
 		this.limit_absence = limit_absence;
-	}	
-	
+	}
 }

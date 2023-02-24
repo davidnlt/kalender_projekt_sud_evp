@@ -22,6 +22,7 @@ public class UserTable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private Integer id;
 	
 	@Column(name="firstname", length=255, nullable=false, unique=false)
@@ -33,8 +34,10 @@ public class UserTable {
 	@Column(name="department_id", nullable=false, unique=false)
 	private int department_id;
 	
+	@Column(name="holidays_total", nullable=false, unique=false)
 	private int holidays_total;
 	
+	@Column(name="holidays_remaining", nullable=false, unique=false)
 	private int holidays_remaining;
 	
 	@Column(name="username", length=255, nullable=false, unique=true)

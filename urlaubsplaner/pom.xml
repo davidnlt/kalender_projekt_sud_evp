@@ -8,11 +8,11 @@
 		<version>3.0.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>RestApplicationSQL-1</artifactId>
+	<groupId>sud_evp</groupId>
+	<artifactId>urlaubsplaner</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>RestApplicationSQL-1</name>
-	<description>Demo project for Spring Boot</description>
+	<name>urlaubsplaner</name>
+	<description>urlaubsplaner project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -89,8 +89,9 @@
 		    <scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-		    <artifactId>h2</artifactId>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-test</artifactId>
+		    <version>4.2.2.RELEASE</version>
 		    <scope>test</scope>
 		</dependency>
 	</dependencies>

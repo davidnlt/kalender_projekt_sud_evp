@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.DatabaseHandler;
+import sud_evp.database.model.Department;
 import sud_evp.database.model.Entry;
 import sud_evp.database.model.Person;
 import sud_evp.dto.EntryDto;
@@ -119,6 +120,16 @@ public class BasicController {
 		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);
 		this.databaseHandler.deleteEntry(username, entry_id);
 		this.databaseHandler.updateUserDays(username);
+	}
+	
+	@GetMapping("/departments")
+	public List<Department> getDepartments() {
+		return this.databaseHandler.getDepartments();
+	}
+	
+	@GetMapping("/test")
+	public String test(){
+		return "Hallo Wlet";
 	}
 	
 }
