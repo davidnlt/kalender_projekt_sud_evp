@@ -3,6 +3,8 @@
  */
 package sud_evp.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import sud_evp.database.DatabaseHandler;
@@ -29,6 +32,7 @@ import sud_evp.repository.UserRepository;
 @WebMvcTest(BasicController.class)
 @AutoConfigureMockMvc
 public class BasicControllerTest {
+	
 	@Autowired
 	private MockMvc mvc;
 	
@@ -80,22 +84,33 @@ public class BasicControllerTest {
 	}
 	
 	@Test
+	public void test() throws Exception {
+		//Arrange
+		
+		//Act
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/test").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		//Assert
+		assertEquals("Hallo Wlet", mvcResult.getResponse().getContentAsString());
+	}
+	
+	@Test
 	@WithMockUser(roles = "ADMIN")
 	public void BasicController_getDepartments() throws Exception {
 		//Arrange
 		
 		//Act
-		/*MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
-				.get("/test")
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.get("/departments")
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andReturn();*/
-		mvc.perform(MockMvcRequestBuilders.get("test")
-	            .accept(MediaType.ALL))
-	            .andExpect(status().isOk());
+				.andReturn();
 		
 		//Assert
-		//assertEquals("", mvcResult.getResponse().getContentAsString());
+		assertEquals("Hallo Wlet", mvcResult.getResponse().getContentAsString());
 	}
 }

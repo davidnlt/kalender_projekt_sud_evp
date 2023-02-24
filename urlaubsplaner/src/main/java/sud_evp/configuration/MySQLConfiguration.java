@@ -20,7 +20,6 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
  *
  */
 @Configuration
-//@EnableJpaRepositories(basePackages = {"sud_evp.repository"})
 public class MySQLConfiguration {
 	@Value("${spring.datasource.driver-class-name}")
 	private String database_driver;

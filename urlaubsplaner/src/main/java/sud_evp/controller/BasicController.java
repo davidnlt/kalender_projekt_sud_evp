@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import sud_evp.configuration.security.JWTTokenGenerator;
@@ -31,7 +32,7 @@ import sud_evp.dto.PersonNameDto;
  *
  */
 @CrossOrigin(origins = "http://localhost:3000")
-@RestController
+@RestController()
 public class BasicController {
 	
 	@Autowired
@@ -126,6 +127,7 @@ public class BasicController {
 	public List<Department> getDepartments() {
 		return this.databaseHandler.getDepartments();
 	}
+
 	
 	@GetMapping("/test")
 	public String test(){

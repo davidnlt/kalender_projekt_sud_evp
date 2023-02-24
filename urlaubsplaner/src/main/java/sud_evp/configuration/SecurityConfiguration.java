@@ -38,8 +38,8 @@ public class SecurityConfiguration{
 	 * @return 
 	 * 
 	 */
+	/*
 	@Bean
-	@Order(1)
 	public SecurityFilterChain departmentFilterchain(HttpSecurity http) throws Exception{
 		 http
 		    .csrf().disable()
@@ -60,7 +60,6 @@ public class SecurityConfiguration{
 	 * 
 	 */
 	@Bean
-	@Order(2)
 	public SecurityFilterChain securityFilterchain(HttpSecurity http) throws Exception{
 		 http
 		    .csrf().disable()

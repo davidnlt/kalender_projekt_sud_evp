@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.persistence.criteria.Path;
 import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.model.UserTable;
 import sud_evp.dto.AuthResponseDto;
@@ -34,7 +36,6 @@ import sud_evp.repository.UserRepository;
  */
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@Controller
 public class AuthController {
 	@Autowired
 	private AuthenticationManager authenticationManager;
