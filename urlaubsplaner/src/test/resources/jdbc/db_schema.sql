@@ -3,9 +3,9 @@ CREATE DATABASE holidayplanning;
 USE holidayplanning;
 
 #Create user to connect to the database
-DROP USER IF EXISTS 'holiday_dbuser'@'locahost';
-CREATE USER 'holiday_dbuser'@'locahost' IDENTIFIED BY 'fia001';
-GRANT SELECT,INSERT,UPDATE,DELETE,EXECUTE ON holidayplanning.* TO 'holiday_dbuser'@'locahost'; 
+DROP USER IF EXISTS 'holiday_dbuser'@'localhost';
+CREATE USER 'holiday_dbuser'@'localhost' IDENTIFIED BY 'fia001';
+GRANT SELECT,INSERT,UPDATE,DELETE,EXECUTE ON holidayplanning.* TO 'holiday_dbuser'@'localhost'; 
 FLUSH PRIVILEGES;
 
 #Create tables
