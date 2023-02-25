@@ -4,9 +4,9 @@
 package sud_evp.dto;
 
 /**
- * @author busch / kirsche
- * 
  * Data Transfer Object for the registration process
+ * 
+ * @author busch / kirsche
  *
  */
 public class RegisterDto {

@@ -20,7 +20,7 @@ import sud_evp.configuration.security.JWTAuthenticationFilter;
 import sud_evp.configuration.security.JwtAuthEntryPoint;
 
 /**
- * @author busch
+ * @author busch / kirsche
  * 
  * Configuration of the authentication process
  *
@@ -32,9 +32,11 @@ public class SecurityConfiguration{
 	private JwtAuthEntryPoint authEntryPoint;
 	
 	/*
+	 * Returns a filter which is matched to any request to the rest controller
 	 * 
+	 * @param http security 
 	 * 
-	 * @return 
+	 * @return filter with jwt authentication and authentication entry point for all request
 	 * 
 	 */
 	@Bean

@@ -6,7 +6,9 @@ package sud_evp.database.model;
 import java.sql.Date;
 
 /**
- * @author busch
+ * ORM class for the table "holidayentry" in the mysql database.
+ * 
+ * @author busch / kirsche
  *
  */
 public class Entry {

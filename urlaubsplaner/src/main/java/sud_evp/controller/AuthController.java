@@ -44,9 +44,9 @@ public class AuthController {
 	private JWTTokenGenerator jwtTokenGenerator;
 	
 	/*
-	 * Method to register a User to the Database
+	 * Method to register a user to the Database
 	 * 
-	 * @param JSON-File with the following format: {"username":"", "password":"", "firstname":"", "surname":"", "department_id":""}
+	 * @param necessary information to create a new user in the database
 	 * 
 	 * @return Returns Message with a Http-Status if the User was created or not.
 	 * 
@@ -68,7 +68,7 @@ public class AuthController {
 	/*
 	 * Method to login the User
 	 * 
-	 * @param JSON-File with the following format: {"username":"", "password":""}
+	 * @param username + password of the user as a json
 	 * 
 	 * @return Returns Message with a Http-Status if the User username with password can be found in the database
 	 * 
@@ -84,7 +84,7 @@ public class AuthController {
 	/*
 	 * Mapping for a logged-in User to change its firstname, surname or password
 	 * 
-	 * @param JSON-File with the following format: {"firstname":"", "surname":"", "password":""}
+	 * @param new user information
 	 * 
 	 */
 	@PostMapping("/user/update")

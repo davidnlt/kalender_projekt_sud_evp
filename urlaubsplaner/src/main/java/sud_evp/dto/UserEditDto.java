@@ -4,9 +4,9 @@
 package sud_evp.dto;
 
 /**
- * @author busch / kirsche
- * 
  * Data Transfer Object to edit user information
+ * 
+ * @author busch / kirsche
  *
  */
 public class UserEditDto {

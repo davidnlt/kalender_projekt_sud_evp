@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import sud_evp.database.model.UserTable;
 
 /**
+ * Repository to save a user to the database. / retrieve user from the database
+ * 
  * @author busch
  *
  */

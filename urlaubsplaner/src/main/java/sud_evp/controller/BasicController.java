@@ -25,6 +25,8 @@ import sud_evp.database.model.Person;
 import sud_evp.dto.EntryDto;
 
 /**
+ * rest controller to handle all non-user request to the RestController
+ * 
  * @author busch / kirsche
  *
  */
@@ -41,6 +43,7 @@ public class BasicController {
 	
 	/*
 	 * 
+	 * @return all holiday entries in a given month of from the users of the same department
 	 */
 	@GetMapping("/dataentries/{year}/{month}")
 	public List<Entry> getEntries(@RequestHeader("Authorization") String bearertoken, @PathVariable int year, @PathVariable int month) {
@@ -49,6 +52,7 @@ public class BasicController {
 	
 	/*
 	 * 
+	 * @return all holiday entries from the users of the same department
 	 */
 	@GetMapping("/alldataentries")
 	public List<Entry> getAllEntries(@RequestHeader("Authorization") String bearertoken) {
@@ -56,7 +60,8 @@ public class BasicController {
 	}
 	
 	/*
-	 * 
+	 *  
+	 * @return the user information of the user
 	 */
 	@GetMapping("/userinfo")
 	public List<Person> getUserInfo(@RequestHeader("Authorization") String bearertoken){
@@ -64,7 +69,9 @@ public class BasicController {
 	}
 	
 	/*
-	 * 
+	 *  Inserts a new entry into the database
+	 *  Sends http error when certain conditions are met.
+	 *   
 	 */
 	@PostMapping("/entry/save")
 	public void saveEntry(@RequestHeader("Authorization") String bearertoken, @RequestBody EntryDto newEntry) throws IOException {
@@ -90,6 +97,8 @@ public class BasicController {
 	}
 	
 	/*
+	 * Updates an existing entry on the database.
+	 * Sends http error when certain conditions are met.
 	 * 
 	 */
 	@PutMapping("/entry/update")
@@ -115,6 +124,7 @@ public class BasicController {
 	}
 	
 	/*
+	 * Deletes the holiday entry with the id of {entry_id}
 	 * 
 	 */
 	@DeleteMapping("/entry/delete/{entry_id}")

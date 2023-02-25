@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import sud_evp.database.model.Person;
 
 /**
- * @author busch
+ * @author busch / kirsche
  * 
  * This class maps a result object from the jdbc connector to a java object.
  * Not all columns are included in the result set.
@@ -24,14 +24,9 @@ public class PersonMapper implements RowMapper<Person>{
 		Person user = new Person();
 		user.setFirstname(rs.getString("firstname"));
 		user.setSurname(rs.getString("surname"));
-		try {
-			user.setDepartment(rs.getString("department"));
-			user.setHolidays_total(rs.getInt("holidays_total"));
-			user.setHolidays_remaining(rs.getInt("holidays_remaining"));
-		}
-		catch (Exception e){
-			
-		}		
+		user.setDepartment(rs.getString("department"));
+		user.setHolidays_total(rs.getInt("holidays_total"));
+		user.setHolidays_remaining(rs.getInt("holidays_remaining"));
 		return user;
 	}
 }

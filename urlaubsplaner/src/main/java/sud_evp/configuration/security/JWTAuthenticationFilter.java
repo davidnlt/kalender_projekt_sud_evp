@@ -17,9 +17,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import sud_evp.service.CustomerUserDetailsService;
+import sud_evp.service.CustomUserDetailsService;
 
 /**
+ * Class to add a jwt authentication to every http request
+ * 
  * @author busch
  *
  */
@@ -28,11 +30,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter{
 	@Autowired
 	private JWTTokenGenerator tokenGenerator;	
 	@Autowired
-	private CustomerUserDetailsService customerUserDetailsService;
+	private CustomUserDetailsService customerUserDetailsService;
 
+	/*
+	 * checks the http request for a authentication token
+	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		String token = getJWTFromRequest(request);
 		
 		if(StringUtils.hasText(token) && tokenGenerator.validateToken(token)) {
@@ -47,6 +51,14 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter{
 		filterChain.doFilter(request, response);
 	}
 	
+	/*
+	 * Extract the jwt token from a httpservletrequest
+	 * 
+	 * @param HttpServletRequest
+	 * 
+	 * @return jwt token of the http request
+	 * 
+	 */
 	private String getJWTFromRequest(HttpServletRequest request) {
 		String bearerToken = request.getHeader("Authorization");
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {

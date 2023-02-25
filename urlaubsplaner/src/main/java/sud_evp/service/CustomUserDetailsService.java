@@ -18,18 +18,16 @@ import sud_evp.database.model.UserTable;
 import sud_evp.repository.UserRepository;
 
 /**
+ * Gets the user from the user repository and returns it with no authorities;
+ * 
  * @author busch
  *
  */
 @Service
-public class CustomerUserDetailsService implements UserDetailsService{
-	
-	private UserRepository repository;
-	
+public class CustomUserDetailsService implements UserDetailsService{
+
 	@Autowired
-	public CustomerUserDetailsService(UserRepository userRepository) {
-		this.repository = userRepository;
-	}
+	private UserRepository repository;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -37,6 +35,9 @@ public class CustomerUserDetailsService implements UserDetailsService{
 		return new User(user.getUsername(), user.getPassword(), defaultAuthorities());
 	}
 	
+	/*
+	 * Return empty list of authorities
+	 */
 	private Collection<GrantedAuthority> defaultAuthorities(){
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
 		return authorities;

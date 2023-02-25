@@ -11,9 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * @author busch
- * 
  * Class to represent the database table "User"
+ * Used for the repository.
+ * 
+ * @author busch / kirsche 
  *
  */
 @Entity
@@ -46,7 +47,9 @@ public class UserTable {
 	@Column(name="password", length=255, nullable=false, unique=false)
 	private String password;
 	
-	
+	/*
+	 * Default Constructor
+	 */
 	public UserTable() {
 		this("", "", 0, "", "");
 	}

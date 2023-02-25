@@ -17,6 +17,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 /**
+ * Class to handle jwt tokens
+ * 
  * @author busch
  *
  */
@@ -26,6 +28,13 @@ public class JWTTokenGenerator {
 	private static final long JWT_TOKEN_EXPIRATION = 86400000; // 1 Day
 	private SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 	
+	/*
+	 * Generates a jwt token for a authentication
+	 * 
+	 * @param authentication with username and password
+	 * 
+	 * @return jwt token
+	 */
 	public String generateToken(Authentication authentication) {
 		String username = authentication.getName();
 		Date currentDate = new Date();
@@ -40,6 +49,13 @@ public class JWTTokenGenerator {
 		return token;
 	}
 	
+	/*
+	 * Gets the username from a jwt token
+	 * 
+	 * @param jwt token
+	 * 
+	 * @return username
+	 */
 	public String getUsernameFromJWTToken(String token) {
 		Claims claims = Jwts.parserBuilder()
 				.setSigningKey(secret)
@@ -49,6 +65,14 @@ public class JWTTokenGenerator {
 		return claims.getSubject();
 	}
 	
+	/*
+	 * Checks if the token has expired or is wrong
+	 * 
+	 * @param jwt token
+	 * 
+	 * @return true if token is valid
+	 * 
+	 */
 	public boolean validateToken(String token) {
 		try {
 			Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token);

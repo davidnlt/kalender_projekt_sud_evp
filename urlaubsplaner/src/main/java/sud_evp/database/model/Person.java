@@ -4,7 +4,9 @@
 package sud_evp.database.model;
 
 /**
- * @author busch
+ * Class to map user information from sql statements
+ * 
+ * @author busch / kirsche
  *
  */
 public class Person {
@@ -21,14 +23,6 @@ public class Person {
 		this("","","",0,0);
 	}
 	
-	/*
-	 * @param id - Primary Key
-	 * @param vorname - first name
-	 * @param nachname - last name
-	 * @param abteilung_id - id of the department
-	 * @param urlaubstage_gesamt - days off total
-	 * @param urlaubstage_rest - days off remaining
-	 */
 	public Person(String firstname, String surname, String department, Integer holidays_total, Integer holidays_remaning) {
 		this.setFirstname(firstname);
 		this.setSurname(surname);
