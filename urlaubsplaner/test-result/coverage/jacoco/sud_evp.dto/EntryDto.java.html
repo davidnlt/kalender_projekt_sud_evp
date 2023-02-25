@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EntryDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">urlaubsplaner</a> &gt; <a href="index.source.html" class="el_package">sud_evp.dto</a> &gt; <span class="el_source">EntryDto.java</span></div><h1>EntryDto.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package sud_evp.dto;
+
+import java.sql.Date;
+
+/**
+ * @author busch
+ * 
+ * Data Transfer Object for inserting/changing entry information
+ *
+ */
+public class EntryDto {
+	private int entry_id;
+	private Date startdate;
+	private Date enddate;
+	
+<span class="fc" id="L19">	public EntryDto(int entry_id, Date startdate, Date enddate) {</span>
+<span class="fc" id="L20">		this.entry_id = entry_id;</span>
+<span class="fc" id="L21">		this.startdate = startdate;</span>
+<span class="fc" id="L22">		this.enddate = enddate;</span>
+<span class="fc" id="L23">	}</span>
+	
+	public EntryDto() {
+<span class="fc" id="L26">		this(0,null,null);</span>
+<span class="fc" id="L27">	}	</span>
+	
+	public int getEntry_id() {
+<span class="fc" id="L30">		return entry_id;</span>
+	}
+	public void setEntry_id(int entry_id) {
+<span class="fc" id="L33">		this.entry_id = entry_id;</span>
+<span class="fc" id="L34">	}</span>
+	public Date getStartdate() {
+<span class="fc" id="L36">		return startdate;</span>
+	}
+	public void setStartdate(Date startdate) {
+<span class="fc" id="L39">		this.startdate = startdate;</span>
+<span class="fc" id="L40">	}</span>
+	public Date getEnddate() {
+<span class="fc" id="L42">		return enddate;</span>
+	}
+	public void setEnddate(Date enddate) {
+<span class="fc" id="L45">		this.enddate = enddate;</span>
+<span class="fc" id="L46">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

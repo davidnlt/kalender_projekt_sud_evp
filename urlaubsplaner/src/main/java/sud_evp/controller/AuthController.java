@@ -11,15 +11,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.persistence.criteria.Path;
 import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.model.UserTable;
 import sud_evp.dto.AuthResponseDto;
@@ -81,7 +78,7 @@ public class AuthController {
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String token = jwtTokenGenerator.generateToken(authentication);
-		return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);	
+		return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
 	}
 	
 	/*

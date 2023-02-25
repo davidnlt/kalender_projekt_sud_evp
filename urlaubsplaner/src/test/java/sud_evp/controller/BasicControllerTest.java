@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,16 +20,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
+import com.jayway.jsonpath.JsonPath;
+
+import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.DatabaseHandler;
 import sud_evp.repository.UserRepository;
 
 /**
- * @author busch
+ * @author busch /kirsche
  *
  */
 @WebMvcTest(BasicController.class)
@@ -35,6 +43,8 @@ public class BasicControllerTest {
 	
 	@Autowired
 	private MockMvc mvc;
+	@Autowired
+	private JWTTokenGenerator jwtTokenGenerator;
 	
 	@MockBean
 	private UserRepository userRepository;
@@ -47,8 +57,8 @@ public class BasicControllerTest {
 	public void createDatabaseHandler() {
 		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		dataSource.setUrl("jdbc:mysql://localhost:3306/test");
-		dataSource.setUsername("root");
-		dataSource.setPassword("coldbusch95");
+		dataSource.setUsername("user_testdb");
+		dataSource.setPassword("password");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		jdbcTemplate.execute("CREATE TABLE Department(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, limit_absence INT NOT NULL)");
 		jdbcTemplate.execute("CREATE TABLE user(id INT AUTO_INCREMENT PRIMARY KEY, firstname VARCHAR(255) NOT NULL, surname VARCHAR(255) NOT NULL, department_id INT NOT NULL, holidays_total INT NOT NULL, holidays_remaining INT NOT NULL, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, CONSTRAINT FK_Department FOREIGN KEY (department_id) REFERENCES Department(id))");
@@ -68,6 +78,7 @@ public class BasicControllerTest {
 		jdbcTemplate.execute("INSERT INTO HolidayEntry VALUES (2, 2, '2023-02-20', '2023-02-24', 5)");
 		jdbcTemplate.execute("INSERT INTO HolidayEntry VALUES (3, 1, '2023-01-02', '2023-01-13', 10)");
 		jdbcTemplate.execute("INSERT INTO HolidayEntry VALUES (3, 2, '2023-01-30', '2023-02-03', 5)");
+		jdbcTemplate.execute("INSERT INTO HolidayEntry VALUES (4, 1, '2023-04-30', '2023-05-03', 5)");
 		this.databaseHandler = new DatabaseHandler();
 		this.databaseHandler.setJdbcTemplate(jdbcTemplate);
 	}
@@ -84,33 +95,325 @@ public class BasicControllerTest {
 	}
 	
 	@Test
-	public void test() throws Exception {
+	public void BasicController_Userinfo() throws Exception {
 		//Arrange
+		String username1 = "user1";
+		String password1 = "user1";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
 		
-		//Act
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/test").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		//Assert
-		assertEquals("Hallo Wlet", mvcResult.getResponse().getContentAsString());
-	}
-	
-	@Test
-	@WithMockUser(roles = "ADMIN")
-	public void BasicController_getDepartments() throws Exception {
-		//Arrange
-		
-		//Act
+		//Act	
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
-				.get("/departments")
+				.get("/userinfo")
+				.header("Authorization", token)
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andReturn();
+		String response = mvcResult.getResponse().getContentAsString();
+		String firstname = JsonPath.read(response,"$[0].firstname");
+		String surname = JsonPath.read(response,"$[0].surname");
+		String department = JsonPath.read(response,"$[0].department");
+		int holidays_total = JsonPath.parse(response).read("$[0].holidays_total");
+		int holidays_remaining = JsonPath.parse(response).read("$[0].holidays_remaining");
+
+		//Assert
+		assertEquals("Kevin", firstname);
+		assertEquals("Busch", surname);
+		assertEquals("Anwendungsentwicklung", department);
+		assertEquals(30, holidays_total);
+		assertEquals(25, holidays_remaining);
+		
+	}
+	
+	@Test
+	public void BasicController_Userinfo_NoAuth() throws Exception {
+		
+		//Act
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.get("/userinfo")
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		assertEquals(400, mvcResult.getResponse().getStatus());
+	}
+		
+	@Test
+	public void BasicController_EntrySave_Overlap() throws Exception {
+		//Arrange
+		String username1 = "user1";
+		String password1 = "user1";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"0\",\"startdate\":\"2023-01-01\",\"enddate\":\"2023-01-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.post("/entry/save")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
 		
 		//Assert
-		assertEquals("Hallo Wlet", mvcResult.getResponse().getContentAsString());
+		assertEquals(400, mvcResult.getResponse().getStatus());
+		assertEquals(true, mvcResult.getResponse().getErrorMessage().contains("Fehler, Überschneidung"));
+		
 	}
+	@Test
+	public void BasicController_EntrySave_NoDaysRemaining() throws Exception {
+		//Arrange
+		String username1 = "user1";
+		String password1 = "user1";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"0\",\"startdate\":\"2023-03-01\",\"enddate\":\"2023-05-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.post("/entry/save")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		//Assert
+		assertEquals(400, mvcResult.getResponse().getStatus());
+		assertEquals(true, mvcResult.getResponse().getErrorMessage().contains("Nicht genügend Urlaubstage"));
+	}
+	
+	@Test
+	public void BasicController_EntrySave_LimitReached() throws Exception {
+		//Arrange
+		String username1 = "user4";
+		String password1 = "user4";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"0\",\"startdate\":\"2023-01-01\",\"enddate\":\"2023-01-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.post("/entry/save")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		//Assert
+		assertEquals(400, mvcResult.getResponse().getStatus());
+		assertEquals(true, mvcResult.getResponse().getErrorMessage().contains("Fehler, Abwesendheitslimit"));
+	}
+	
+	@Test
+	public void BasicController_EntrySave() throws Exception {
+		//Arrange
+		String username1 = "user4";
+		String password1 = "user4";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"0\",\"startdate\":\"2023-06-01\",\"enddate\":\"2023-06-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.post("/entry/save")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		//Assert
+		assertEquals(200, mvcResult.getResponse().getStatus());
+	}
+	
+	@Test
+	public void BasicController_EntryUpdate_Overlap() throws Exception {
+		//Arrange
+		String username1 = "user2";
+		String password1 = "user2";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"2\",\"startdate\":\"2023-01-01\",\"enddate\":\"2023-01-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.put("/entry/update")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		//Assert
+		assertEquals(400, mvcResult.getResponse().getStatus());
+		assertEquals(true, mvcResult.getResponse().getErrorMessage().contains("Fehler, Überschneidung"));
+		
+	}
+	@Test
+	public void BasicController_EntryUpdate_NoDaysRemaining() throws Exception {
+		//Arrange
+		String username1 = "user2";
+		String password1 = "user2";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"2\",\"startdate\":\"2023-02-20\",\"enddate\":\"2023-05-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.put("/entry/update")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		//Assert
+		assertEquals(400, mvcResult.getResponse().getStatus());
+		assertEquals(true, mvcResult.getResponse().getErrorMessage().contains("Nicht genügend Urlaubstage"));
+	}
+	
+	@Test
+	public void BasicController_EntryUpdate_LimitReached() throws Exception {
+		//Arrange
+		String username1 = "user4";
+		String password1 = "user4";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"1\",\"startdate\":\"2023-01-01\",\"enddate\":\"2023-01-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.put("/entry/update")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		//Assert
+		assertEquals(400, mvcResult.getResponse().getStatus());
+	}
+	
+	@Test
+	public void BasicController_EntryUpdate() throws Exception {
+		//Arrange
+		String username1 = "user4";
+		String password1 = "user4";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		String entry = "{\"entry_id\":\"1\",\"startdate\":\"2023-10-01\",\"enddate\":\"2023-10-10\"}";
+		
+		//Act 
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.put("/entry/update")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(entry))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		//Assert
+		assertEquals(200, mvcResult.getResponse().getStatus());
+	}
+	
+	@Test
+	public void BasicController_EntryDelete() throws Exception {
+		//Arrange
+		String username1 = "user4";
+		String password1 = "user4";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		int entry_id = 1;
+		
+		//Act
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.delete("/entry/delete/" + entry_id)
+				.header("Authorization", token))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		//Assert
+		assertEquals(200, mvcResult.getResponse().getStatus());
+	}
+	
+	@Test
+	public void BasicController_getEntries() throws Exception {
+		//Arrange
+		String username1 = "user1";
+		String password1 = "user1";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		int year = 2023;
+		int month = 1;
+		
+		//Act
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.get("/dataentries/" + year + "/" + month)
+				.header("Authorization", token))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		String response = mvcResult.getResponse().getContentAsString();
+		int size = JsonPath.parse(response).read("$.length()");
+		String firstname = JsonPath.read(response,"$[0].firstname");
+		String surname = JsonPath.read(response,"$[0].surname");
+		int entry_id = JsonPath.parse(response).read("$[0].entry_id");
+		int holidays_entry = JsonPath.parse(response).read("$[0].holidays_entry");
+		String startdate = JsonPath.read(response,"$[0].startdate");
+		String enddate = JsonPath.read(response,"$[0].enddate");
+		
+		//Assert
+		assertEquals(4, size);
+		assertEquals("Kevin", firstname);
+		assertEquals("Busch", surname);
+		assertEquals(1, entry_id);
+		assertEquals("2023-01-02", startdate);
+		assertEquals("2023-01-06", enddate);
+		assertEquals(5, holidays_entry);
+	}
+	
+	@Test
+	public void BasicController_getAllEntries() throws Exception {
+		//Arrange
+		String username1 = "user1";
+		String password1 = "user1";
+		Authentication authentication = new UsernamePasswordAuthenticationToken(username1, password1, defaultAuthorities());
+		String token = jwtTokenGenerator.generateToken(authentication);
+		
+		//Act
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders
+				.get("/alldataentries")
+				.header("Authorization", token))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		String response = mvcResult.getResponse().getContentAsString();
+		int size = JsonPath.parse(response).read("$.length()");
+
+		
+		//Assert
+		assertEquals(6, size);
+	}
+	
+	private Collection<GrantedAuthority> defaultAuthorities(){
+		Collection<GrantedAuthority> authorities = new ArrayList<>();
+		return authorities;
+	}
+	
 }

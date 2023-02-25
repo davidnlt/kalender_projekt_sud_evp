@@ -1,15 +1,19 @@
-//CREATE DATABASE holidayplanning;
-//USE holidayplanning;
+#Create database
+CREATE DATABASE holidayplanning;
+USE holidayplanning;
 
-//CREATE USER 'dbuser'@'%' IDENTIFIED BY 'fia001';
-//GRANT SELECT,INSERT,UPDATE,DELETE,EXECUTE ON holidayplanning.* TO 'dbuser'@'%'; 
-//FLUSH PRIVILEGES;
+#Create user to connect to the database
+DROP USER IF EXISTS 'holiday_dbuser'@'locahost';
+CREATE USER 'holiday_dbuser'@'locahost' IDENTIFIED BY 'fia001';
+GRANT SELECT,INSERT,UPDATE,DELETE,EXECUTE ON holidayplanning.* TO 'holiday_dbuser'@'locahost'; 
+FLUSH PRIVILEGES;
+
+#Create tables
 CREATE TABLE Department(
 	id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     limit_absence INT NOT NULL
 );
-
 CREATE TABLE user(
 	id INT AUTO_INCREMENT PRIMARY KEY,
     firstname VARCHAR(255) NOT NULL,
@@ -21,7 +25,6 @@ CREATE TABLE user(
     password VARCHAR(255) NOT NULL,
 	CONSTRAINT FK_Department FOREIGN KEY (department_id) REFERENCES Department(id)
 );
-
 CREATE TABLE HolidayEntry(
 	user_id INT NOT NULL,
     entry_id INT NOT NULL,
@@ -32,21 +35,21 @@ CREATE TABLE HolidayEntry(
     CONSTRAINT FK_User FOREIGN KEY (user_id) REFERENCES User(id)
 );
 
+#insert non-editable data
+INSERT INTO Department VALUES(1, 'Anwendungsentwicklung', 60);
+INSERT INTO Department VALUES(2, 'Systemintegration', 50);
+
+#Create SQL functions
 SET GLOBAL log_bin_trust_function_creators = 1;
 
 DROP function IF EXISTS `f_CalculateWorkdays`;
 DELIMITER $$
-USE `holidayplanning`$$
 CREATE FUNCTION `f_CalculateWorkdays`(p_startdate date, p_enddate date) RETURNS int
 BEGIN
 RETURN (5 * (DATEDIFF(p_enddate, p_startdate) DIV 7) + MID('0123444401233334012222340111123400001234000123440', 7 * WEEKDAY(p_startdate) + WEEKDAY(p_enddate) + 1, 1) + 1);
 END;
-$$
-DELIMITER ;
 
 DROP function IF EXISTS `f_CheckOverlap`;
-DELIMITER $$
-USE `holidayplanning`$$
 CREATE FUNCTION `f_CheckOverlap`(p_user_id int, p_startdate date, p_enddate date) RETURNS tinyint(1)
 BEGIN
 	DECLARE v_count_entries integer;

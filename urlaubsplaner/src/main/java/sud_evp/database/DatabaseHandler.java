@@ -9,15 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import sud_evp.database.mapper.DepartmentMapper;
 import sud_evp.database.mapper.EntryMapper;
 import sud_evp.database.mapper.PersonMapper;
-import sud_evp.database.mapper.PersonNamesMapper;
-import sud_evp.database.model.Department;
 import sud_evp.database.model.Entry;
 import sud_evp.database.model.Person;
 import sud_evp.dto.EntryDto;
-import sud_evp.dto.PersonNameDto;
 
 
 
@@ -226,20 +222,6 @@ public class DatabaseHandler {
 	}
 	
 	/*
-	 * Gets the user names of the department
-	 *
-	 *@param username - username of the user
-	 *
-	 *@return usernames
-	 * 
-	 */
-	public List<PersonNameDto> getDepartmentUserNames(String username){
-		String sqlQuery = "SELECT id, firstname, surname FROM User WHERE department_id = (SELECT department_id FROM User WHERE username = '" + username + "')";
-		List<PersonNameDto> usernames = jdbcTemplate.query(sqlQuery, new PersonNamesMapper());
-		return usernames;
-	}
-	
-	/*
 	 * Gets the Limit of the Department from the Username
 	 * 
 	 * @param username - username of the user
@@ -250,15 +232,6 @@ public class DatabaseHandler {
 	public int getDepartmentLimitFromUsername(String username) {
 		String sqlQuery = "SELECT limit_absence FROM Department WHERE id = (SELECT department_id FROM User WHERE username = '" + username  + "')";
 		return jdbcTemplate.queryForObject(sqlQuery, int.class);
-	}
-	
-	/*
-	 * @return Returns a list of all departments on the sql database
-	 */
-	public List<Department> getDepartments(){
-		String sqlQuery = "SELECT * FROM Department";
-		List<Department> departments = jdbcTemplate.query(sqlQuery, new DepartmentMapper());
-		return departments;
 	}
 	
 	public JdbcTemplate getJdbcTemplate() {

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">urlaubsplaner</a> &gt; <a href="index.source.html" class="el_package">sud_evp.database</a> &gt; <span class="el_source">DatabaseHandler.java</span></div><h1>DatabaseHandler.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package sud_evp.database;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import sud_evp.database.mapper.EntryMapper;
+import sud_evp.database.mapper.PersonMapper;
+import sud_evp.database.model.Entry;
+import sud_evp.database.model.Person;
+import sud_evp.dto.EntryDto;
+
+
+
+/**
+ * @author busch / kirsche
+ *
+ * Database handler to execute sql-statements with jdbc template
+ *
+ */
+@Component(&quot;databaseHandler&quot;)
+<span class="fc" id="L27">public class DatabaseHandler {</span>
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
+	/*
+	 * Get all holiday entries, which affect one specific month in a year, for all users of the same department of the logged in user
+	 * 
+	 * @param username - username of the user
+	 * @param year - year
+	 * @param month - month
+	 * 
+	 * @return List of all entries a month of a year
+	 */
+	public List&lt;Entry&gt; selectEntries(String username, int year, int month) {
+<span class="fc" id="L42">		String startdate = &quot;'&quot; + year + &quot;-&quot; + month + &quot;-&quot; + &quot;01'&quot;;</span>
+<span class="fc" id="L43">		String sqlQuery = &quot;SELECT u.firstname, u.surname, he.entry_id, he.startdate, he.enddate, he.holidays_entry FROM HolidayEntry AS he &quot;</span>
+						+ &quot;LEFT JOIN User AS u &quot;
+						+ &quot;ON u.id = he.user_id &quot;
+						+ &quot;WHERE ((he.startdate&lt;= &quot; + startdate + &quot;  AND he.enddate&gt;= &quot; + startdate + &quot;)&quot;
+						+ &quot; OR (he.startdate &gt;= &quot; + startdate + &quot; AND he.enddate &lt;= LAST_DAY(&quot; + startdate + &quot;))&quot;
+						+ &quot; OR (he.startdate &lt;= &quot; + startdate + &quot; AND he.enddate &gt;= LAST_DAY(&quot; + startdate + &quot;))&quot;
+						+ &quot; OR (he.startdate &lt;= LAST_DAY(&quot; + startdate + &quot;) AND he.enddate &gt;= LAST_DAY(&quot; + startdate + &quot;)))&quot;
+						+ &quot; AND u.department_id IN (SELECT department_id FROM User WHERE username = '&quot; + username + &quot;')&quot;;
+<span class="fc" id="L51">		List&lt;Entry&gt; entryList = jdbcTemplate.query(sqlQuery, new EntryMapper());</span>
+<span class="fc" id="L52">		return entryList;</span>
+	}
+	
+	/*
+	 * Get all holiday entries, for all users of the same department with their names, of the logged in user
+	 * 
+	 * @param username - username of the user
+	 * 
+	 * @return List of all holiday entries
+	 */
+	public List&lt;Entry&gt; selectAllEntries(String username) {
+<span class="fc" id="L63">		String sqlQuery = &quot;SELECT u.firstname, u.surname, he.entry_id, he.startdate, he.enddate, he.holidays_entry FROM HolidayEntry AS he &quot;</span>
+						+ &quot;LEFT JOIN User AS u &quot;
+						+ &quot;ON u.id = he.user_id &quot;
+						+ &quot;WHERE u.department_id IN (SELECT department_id FROM User WHERE username = '&quot; + username + &quot;')&quot;;
+<span class="fc" id="L67">		List&lt;Entry&gt; entryList = jdbcTemplate.query(sqlQuery, new EntryMapper());</span>
+<span class="fc" id="L68">		return entryList;</span>
+	}
+	
+	/*
+	 * Calls a function on the SQL-Server to check if the absense limit is going to up passed with the new entry
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return true or false if the limit has been exceeded
+	 * 
+	 */
+	public boolean checkDeparmentLimit(String username, EntryDto Entry) {
+<span class="fc" id="L81">		String sqlQuery = &quot;SELECT f_CheckOverlap((SELECT u.id FROM User AS u WHERE u.username = '&quot; + username + &quot;'),'&quot; + Entry.getStartdate() + &quot;','&quot; + Entry.getEnddate() + &quot;')&quot;;</span>
+<span class="fc" id="L82">		Integer checkOverlap = jdbcTemplate.queryForObject(sqlQuery, Integer.class);</span>
+<span class="pc bpc" id="L83" title="1 of 4 branches missed.">		return (checkOverlap != null &amp;&amp; checkOverlap &gt; 0);</span>
+	}
+	
+	/*
+	 * Calculates if the user if the new/updated holiday entry has more days than the user has remaining
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return true of false if the remaining days are enough
+	 * 
+	 */
+	public boolean checkDaysRemaining(String username, EntryDto Entry) {
+<span class="fc" id="L96">		int workdaysEntry = calculateWorkdays( Entry);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">		int workdaysOldEntry = (Entry.getEntry_id() != 0) ? calculateWorkdays(getEntry(username, Entry.getEntry_id())) : 0;</span>
+<span class="fc" id="L98">		List&lt;Person&gt; user = getUserInfo(username);</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		return (user.get(0).getHolidays_remaining() &gt;= (workdaysEntry - workdaysOldEntry));</span>
+	}
+	
+	/*
+	 * Get one specific entry of a user
+	 * 
+	 * @param username - username of the user
+	 * @param entryid - id for the holiday entry
+	 * 
+	 * @return Returns a entrydto of the entry
+	 * 
+	 */
+	public EntryDto getEntry(String username, int entryid){
+<span class="fc" id="L112">		String sqlQuery = &quot;SELECT * FROM HolidayEntry WHERE user_id = (SELECT u.id FROM User AS u WHERE u.username = '&quot; + username + &quot;') AND entry_id = &quot; + entryid;</span>
+<span class="fc" id="L113">		List&lt;Entry&gt; entry = jdbcTemplate.query(sqlQuery, new EntryMapper());</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">		if (entry.size() &gt; 0) {</span>
+<span class="fc" id="L115">			return new EntryDto(entry.get(0).getEntry_id(), entry.get(0).getStartdate(), entry.get(0).getEnddate());</span>
+		} else {
+<span class="fc" id="L117">			return new EntryDto();</span>
+		}
+	}
+	
+	/*
+	 * Calls SQL-function to calculate the count of workdays between 2 days. Saturdays and Sundays are not counted as workdays.
+	 * National holidays are being ignored.
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return Returns the calculated number of workdays
+	 * 
+	 */
+	public int calculateWorkdays(EntryDto Entry) {
+<span class="fc" id="L132">		String sqlQuery = &quot;SELECT f_CalculateWorkdays('&quot; + Entry.getStartdate() + &quot;','&quot; + Entry.getEnddate() + &quot;')&quot;;</span>
+<span class="fc" id="L133">		return jdbcTemplate.queryForObject(sqlQuery, int.class);</span>
+	}
+	
+	/*
+	 * Checks if there is another holiday entry for the user, which would overlap with the new/updated entry
+	 * 
+	 * @param username - username of the user
+	 * @param Entry - holiday entry object with id, startdate and enddate
+	 * 
+	 * @return Overlap exists or not
+	 * 
+	 */
+	public boolean checkEntryOverlap(String username, EntryDto Entry) {
+<span class="fc" id="L146">		String sqlQuery = &quot;SELECT EXISTS(SELECT * FROM HolidayEntry WHERE user_id = (SELECT u.id FROM User AS u WHERE u.username = '&quot; + username + &quot;')&quot; + </span>
+<span class="fc" id="L147">						  &quot; AND (('&quot; + Entry.getStartdate()  + &quot;' &lt;= startdate AND '&quot; + Entry.getEnddate() + &quot;' &gt;= startdate) OR &quot; +</span>
+<span class="fc" id="L148">						  &quot;('&quot; + Entry.getStartdate()  + &quot;' &gt;= startdate AND '&quot; + Entry.getEnddate() + &quot;' &lt;= enddate) OR &quot; +</span>
+<span class="fc" id="L149">						  &quot;('&quot; + Entry.getStartdate()  + &quot;' &lt;= startdate AND '&quot; + Entry.getEnddate() + &quot;' &gt;= enddate) OR &quot; +</span>
+<span class="fc" id="L150">						  &quot;('&quot; + Entry.getStartdate()  + &quot;' &lt;= enddate AND '&quot; + Entry.getEnddate() + &quot;' &gt;= enddate))&quot; +</span>
+<span class="fc" id="L151">						  &quot; AND entry_id  != &quot; + Entry.getEntry_id() +&quot;)&quot;;</span>
+<span class="fc" id="L152">		Integer overlappingentry = jdbcTemplate.queryForObject(sqlQuery, Integer.class);</span>
+<span class="pc bpc" id="L153" title="1 of 4 branches missed.">		return (overlappingentry != null &amp;&amp; overlappingentry &gt; 0);</span>
+	}
+	
+	/*
+	 * Create a new holiday entry of the database for a user
+	 * 
+	 * @param username - username of the user
+	 * @param newEntry - information about the new holiday entry
+	 * 
+	 */
+	public void insertEntry(String username, EntryDto newEntry) {
+<span class="fc" id="L164">		String sqlQuery = &quot;INSERT INTO HolidayEntry &quot;</span>
+						+ &quot;VALUES((SELECT u.id FROM User AS u WHERE u.username = ?),&quot;
+							   + &quot;(SELECT (IFNULL(MAX(he.entry_id),0) + 1) FROM HolidayEntry AS he WHERE he.user_id = (SELECT u.id FROM User AS u WHERE u.username = ?)),&quot;
+							   + &quot;?,&quot;
+							   + &quot;?,&quot;
+							   + &quot;?)&quot;;
+<span class="fc" id="L170">		this.jdbcTemplate.update(sqlQuery, username, username, newEntry.getStartdate(), newEntry.getEnddate(), calculateWorkdays(newEntry));</span>
+<span class="fc" id="L171">	}</span>
+	
+	/*
+	 * Updates the remaining holidays of a user
+	 * 
+	 * @param username - username of the user
+	 * 
+	 */
+	public void updateUserDays(String username) {
+<span class="fc" id="L180">		String sqlQuery = &quot;UPDATE User SET holidays_remaining = holidays_total - (SELECT IFNULL(SUM(holidays_entry),0) FROM holidayentry WHERE user_id = id)  WHERE username = ?&quot;;</span>
+<span class="fc" id="L181">		this.jdbcTemplate.update(sqlQuery, username);</span>
+<span class="fc" id="L182">	}</span>
+	
+	/*
+	 * Updates a holiday entry with the new information
+	 * 
+	 * @param username - username of the user
+	 * @param updatedEntry - information of the updated holiday entry
+	 * 
+	 */
+	public void updateEntry(String username, EntryDto updatedEntry) {
+<span class="fc" id="L192">		String sqlQuery = &quot;UPDATE HolidayEntry SET startdate = ?, enddate = ?, &quot; +</span>
+<span class="fc" id="L193">						  &quot;holidays_entry = '&quot; + calculateWorkdays(updatedEntry) +&quot;' &quot; + </span>
+						  &quot;WHERE user_id = (SELECT u.id FROM User AS u WHERE u.username = ?) AND entry_id = ?&quot;;
+<span class="fc" id="L195">		this.jdbcTemplate.update(sqlQuery, updatedEntry.getStartdate(), updatedEntry.getEnddate(), username, updatedEntry.getEntry_id());</span>
+<span class="fc" id="L196">	}</span>
+	
+	/*
+	 * Deletes a holiday entry from the database
+	 * 
+	 * @param username - username of the user
+	 * @param entryid - id of the holiday entry of the user which gets deleted
+	 * 
+	 */
+	public void deleteEntry(String username, int entryid) {
+<span class="fc" id="L206">		String sqlQuery = &quot;DELETE FROM HolidayEntry WHERE user_id = (SELECT u.id FROM User AS u WHERE u.username = ?) AND entry_id = ?&quot;;</span>
+<span class="fc" id="L207">		this.jdbcTemplate.update(sqlQuery, username, entryid);</span>
+<span class="fc" id="L208">	}</span>
+	
+	/*
+	 * Gets the user information from the database
+	 * 
+	 * @param username - username of the user
+	 * 
+	 * @return Person object of the user 
+	 * 
+	 */
+	public List&lt;Person&gt; getUserInfo(String username) {
+<span class="fc" id="L219">		String sqlQuery = &quot;SELECT u.firstname, u.surname,d.name as department, u.holidays_total, u.holidays_remaining FROM User AS u LEFT JOIN Department AS d ON u.department_id = d.id WHERE u.username = '&quot; + username + &quot;'&quot;;</span>
+<span class="fc" id="L220">		List&lt;Person&gt; user = jdbcTemplate.query(sqlQuery, new PersonMapper());</span>
+<span class="fc" id="L221">		return user;</span>
+	}
+	
+	/*
+	 * Gets the Limit of the Department from the Username
+	 * 
+	 * @param username - username of the user
+	 * 
+	 * @return absence limit of the department for the user
+	 * 
+	 */
+	public int getDepartmentLimitFromUsername(String username) {
+<span class="fc" id="L233">		String sqlQuery = &quot;SELECT limit_absence FROM Department WHERE id = (SELECT department_id FROM User WHERE username = '&quot; + username  + &quot;')&quot;;</span>
+<span class="fc" id="L234">		return jdbcTemplate.queryForObject(sqlQuery, int.class);</span>
+	}
+	
+	public JdbcTemplate getJdbcTemplate() {
+<span class="nc" id="L238">		return jdbcTemplate;</span>
+	}
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+<span class="fc" id="L241">		this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L242">	}</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

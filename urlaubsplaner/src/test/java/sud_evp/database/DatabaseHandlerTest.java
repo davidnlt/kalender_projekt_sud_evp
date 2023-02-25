@@ -16,13 +16,12 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import sud_evp.database.model.Department;
 import sud_evp.database.model.Entry;
 import sud_evp.database.model.Person;
 import sud_evp.dto.EntryDto;
 
 /**
- * @author busch
+ * @author busch / kirsche
  *
  */
 @TestInstance(Lifecycle.PER_CLASS)
@@ -36,8 +35,8 @@ public class DatabaseHandlerTest {
 	public void createDatabaseHandler() {
 		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		dataSource.setUrl("jdbc:mysql://localhost:3306/test");
-		dataSource.setUsername("root");
-		dataSource.setPassword("coldbusch95");
+		dataSource.setUsername("user_testdb");
+		dataSource.setPassword("password");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		jdbcTemplate.execute("CREATE TABLE Department(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, limit_absence INT NOT NULL)");
 		jdbcTemplate.execute("CREATE TABLE user(id INT AUTO_INCREMENT PRIMARY KEY, firstname VARCHAR(255) NOT NULL, surname VARCHAR(255) NOT NULL, department_id INT NOT NULL, holidays_total INT NOT NULL, holidays_remaining INT NOT NULL, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, CONSTRAINT FK_Department FOREIGN KEY (department_id) REFERENCES Department(id))");
@@ -292,21 +291,4 @@ public class DatabaseHandlerTest {
 		assertEquals(false, checkEntry3);
 		assertEquals(true, checkEntry4);
 	}
-	
-	@Test
-	public void DatabaseHandler_getDepartments() {
-		//Arrange
-				
-		//Act
-		List<Department> departments = this.databaseHandler.getDepartments();
-		
-		//Assert
-		assertEquals(1, departments.get(0).getId());
-		assertEquals(2, departments.get(1).getId());
-		assertEquals("Anwendungsentwicklung", departments.get(0).getName());
-		assertEquals("Systemintegration", departments.get(1).getName());
-		assertEquals(60, departments.get(0).getLimit_absence());
-		assertEquals(50, departments.get(1).getLimit_absence());
-	}
-	
 }
