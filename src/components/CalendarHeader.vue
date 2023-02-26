@@ -1,9 +1,12 @@
 <template>
-  <v-app-bar color="white">
-    <v-toolbar-title>
-      Willkommen {{ firstname }} im "Abteilung-Urblaubskalender"
+  <v-toolbar color="white">
+    <v-toolbar-title class="text-center font-weight-bold">
+      {{ department }} - Urblaubskalender
     </v-toolbar-title>
-
+    <v-spacer></v-spacer>
+    <v-alert v-if="errorMessageUpdateUser" type="error" text outlined>
+      {{ errorMessageUpdateUser }}
+    </v-alert>
     <v-spacer></v-spacer>
     <v-toolbar-item>
       <v-dialog v-model="dialog" persistent width="500">
@@ -18,9 +21,10 @@
           </v-btn>
         </template>
         <v-card>
-          <v-card-title>
-            <span class="text-h5">Benutzerprofil bearbeiten</span>
-          </v-card-title>
+          <v-card-title> Benutzerprofil bearbeiten </v-card-title>
+          <v-alert v-if="errorMessageUpdateUser" type="error" text outlined>
+            {{ errorMessageUpdateUser }}
+          </v-alert>
           <v-card-text>
             <v-container>
               <form ref="form" @submit.prevent="updateUser()">
@@ -74,14 +78,15 @@
                   v-model="password"
                   name="password"
                   label="Passwort"
-                  :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                  :type="show1 ? 'text' : 'password'"
-                  @click:append="show1 = !show1"
+                  :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="show ? 'text' : 'password'"
+                  @click:append="show = !show"
                   color="black"
                   :rules="rules"
                   outlined
                   rounded
                 ></v-text-field>
+
                 <v-row
                   ><v-col
                     ><v-btn variant="text" @click="dialog = false" rounded>
@@ -110,13 +115,15 @@
         Abmelden
       </v-btn>
     </v-toolbar-item>
-  </v-app-bar>
+  </v-toolbar>
 </template>
 
 <script>
 import axios from "axios";
+
 export default {
   name: "CalendarHeader",
+
   data() {
     return {
       firstname: "",
@@ -125,38 +132,65 @@ export default {
       username: "",
       password: "",
       dialog: false,
-      show1: "",
+      show: "",
       rules: [
         (value) => {
           if (value) return true;
           return "Dies ist ein Pflichtfeld";
         },
       ],
+      errorMessageUser: "",
+      errorMessageUpdateUser: "",
     };
   },
-  async created() {
-    await axios
-      .get("http://localhost:8080/userinfo", {
-        headers: { Authorization: localStorage.getItem("AccessToken") },
-      })
-      .then((response) => {
-        console.log(response);
-        localStorage.setItem("Surname", response.data[0].surname);
-        localStorage.setItem("Firstname", response.data[0].firstname);
-        localStorage.setItem("Department", response.data[0].department);
-        this.firstname = localStorage.getItem("Firstname");
-        this.surname = localStorage.getItem("Surname");
-        this.department = localStorage.getItem("Department");
-        this.username = localStorage.getItem("Username");
-        this.password = localStorage.getItem("Password");
-      })
-      .catch((error) => {
-        console.log(error);
-        console.log(error.response.data.message);
-      });
+
+  created() {
+    this.getUserInfo();
   },
 
   methods: {
+    /**
+     * API-Zugriffs-Funktion über ein GET-Request:
+     * Auslesen von Benutzerinformationen des jeweils angemeldeten Benutzers.
+     *
+     * @author David Nolte
+     *
+     * @param AccessToken (eindeutige Identifikation des Benutzers)
+     *
+     * @return Die Antwort der API wird in den Eigenschaften (firstname, surname, department)
+     * des Datenobjekts data() gespeichert. Mithilfe dieses Bindings stehen die Benutzerdaten
+     * der gesamten Komponente zur Verfügung.
+     */
+    async getUserInfo() {
+      await axios
+        .get("http://localhost:8080/userinfo", {
+          headers: { Authorization: localStorage.getItem("AccessToken") },
+        })
+        .then((response) => {
+          console.log(response);
+          this.firstname = response.data[0].firstname;
+          this.surname = response.data[0].surname;
+          this.department = response.data[0].department;
+          this.username = localStorage.getItem("Username");
+          this.password = localStorage.getItem("Password");
+        })
+        .catch((error) => {
+          console.log(error);
+          this.errorMessageUser = error.response.data;
+        });
+    },
+
+    /**
+     * API-Zugriffs-Funktion über ein POST-Request:
+     * Speicherung von vorgenommen Benutzerdaten-Änderungen des jeweils angemeldeten Benutzers.
+     *
+     * @author David Nolte
+     *
+     * @param AccessToken (eindeutige Identifikation des Benutzers)
+     * @param json (JSON-Datei, die den Vornamen, den Nachnamen und das Passwort enthält)
+     *
+     * @return Die Antwort der API wird in der Variablen message des Datenobjekts data() gespeichert.
+     */
     async updateUser() {
       const json = JSON.stringify({
         firstname: `${this.firstname}`,
@@ -175,9 +209,19 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          console.log(error.response.data.message);
+          this.errorMessageUpdateUser = error.response.data.message;
         });
     },
+
+    /**
+     * Abmeldungs-Funktion:
+     * Das eindeutige AccessToken des angemeldeten Benutzers wird aus seinem LocalStorage entfernt.
+     * Somit kann der Benutzer nicht mehr auf die Urlaubskalender-Homepage geleitet werden.
+     *
+     * @author David Nolte
+     *
+     * @return Der Benutzer wird auf die Login-Page umgeleitet.
+     */
     logout() {
       localStorage.clear();
       this.$router.push({ name: "UserLogin" });

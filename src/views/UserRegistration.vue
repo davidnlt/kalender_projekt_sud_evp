@@ -8,6 +8,12 @@
               <div class="text-center">
                 <h1>Account erstellen</h1>
               </div>
+              <v-alert v-if="successMessage" type="success" text outlined>
+                {{ successMessage }}
+              </v-alert>
+              <v-alert v-if="errorMessage" type="error" text outlined>
+                {{ errorMessage }}
+              </v-alert>
               <v-card-text>
                 <form ref="form" @submit.prevent="register()">
                   <v-text-field
@@ -32,16 +38,15 @@
                     rounded
                   ></v-text-field>
 
-                  <v-text-field
+                  <v-select
                     v-model="department"
-                    name="department"
+                    :items="items"
                     label="Abteilung"
-                    type="text"
-                    color="black"
-                    :rules="rules"
                     outlined
                     rounded
-                  ></v-text-field>
+                    required
+                    color="black"
+                  ></v-select>
 
                   <v-text-field
                     v-model="username"
@@ -58,9 +63,9 @@
                     v-model="password"
                     name="password"
                     label="Passwort"
-                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="show1 ? 'text' : 'password'"
-                    @click:append="show1 = !show1"
+                    :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="showPass ? 'text' : 'password'"
+                    @click:append="showPass = !showPass"
                     color="black"
                     :rules="rules"
                     outlined
@@ -71,9 +76,9 @@
                     v-model="confirmPassword"
                     name="confirmPassword"
                     label="Passwort bestätigen"
-                    :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="show2 ? 'text' : 'password'"
-                    @click:append="show2 = !show2"
+                    :append-icon="showPassCon ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="showPassCon ? 'text' : 'password'"
+                    @click:append="showPassCon = !showPassCon"
                     color="black"
                     :rules="rules"
                     outlined
@@ -105,6 +110,7 @@ import axios from "axios";
 
 export default {
   name: "UserRegistration",
+
   data() {
     return {
       username: "",
@@ -112,10 +118,13 @@ export default {
       firstname: "",
       surname: "",
       department: "",
-      departmentId: "1",
+      departmentId: "",
+      items: ["1. Anwendungsentwicklung", "2. Systemintegration"],
       confirmPassword: "",
-      show1: false,
-      show2: false,
+      successMessage: "",
+      errorMessage: "",
+      showPass: false,
+      showPassCon: false,
       rules: [
         (value) => {
           if (value) return true;
@@ -124,8 +133,42 @@ export default {
       ],
     };
   },
+
+  mounted() {
+    this.checkAccess();
+  },
+
   methods: {
+    /**
+     * Tokenprüfungs-Funktion:
+     * Es wird überprüft, ob der Benutzer ein AccessToken besitzt. Dieses befindet sich im LocalStorage.
+     * Liegt ein AccessToken vor, so wird der Benutzer auf die Urlaubskalender-Homepage weitergeleitet.
+     *
+     * @author David Nolte
+     *
+     * @return Der Benutzer wird auf die Urlaubskalender-Homepage weitergeleitet.
+     */
+    checkAccess() {
+      var accessToken = localStorage.getItem("AccessToken");
+      if (accessToken) {
+        this.$router.push({ name: "VacationCalendar" });
+      }
+    },
+
+    /**
+     * API-Registrierungs-Funktion über ein POST-Request:
+     * Bei erfolgreicher Eingabe der erforderlichen Benutzer-Daten wird ein neuer Benutzer-Account angelegt.
+     *
+     * @author David Nolte
+     *
+     * @param json (JSON-Datei, die den Benutzernamen, das Passwort, den Vornamen, den Nachnamen und die Abteilungs-Id enthält)
+     *
+     * @return Abhängig davon ob die Registrierung erfolgreich war oder nicht, wird die Antwort der API entweder in der Variablen 
+     * successMessage oder errorMessage des Datenobjekts data() gespeichert. Mithilfe des Data-Bindings wird die Nachricht dann 
+     * im Frontend ausgegeben.
+     */
     async register() {
+      this.departmentId = this.department.substr(0, 1);
       if (this.password == this.confirmPassword) {
         const json = JSON.stringify({
           username: `${this.username}`,
@@ -140,11 +183,14 @@ export default {
           })
           .then((response) => {
             console.log(response);
-            this.$router.push({ name: "UserLogin" });
+            this.successMessage = response.data;
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {
+            console.log(error);
+            this.errorMessage = error.response.data;
+          });
       } else {
-        alert("Passwort stimmt nicht überein");
+        this.errorMessage = "Die Passwörter stimmen nicht überein!";
       }
     },
   },

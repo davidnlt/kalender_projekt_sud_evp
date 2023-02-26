@@ -8,6 +8,11 @@
               <div class="text-center">
                 <h1>Willkommen zurück</h1>
               </div>
+
+              <v-alert v-if="errorMessage" type="error" text outlined>
+                {{ errorMessage }}
+              </v-alert>
+
               <v-card-text>
                 <form ref="form" @submit.prevent="login()">
                   <v-text-field
@@ -26,9 +31,9 @@
                     v-model="password"
                     name="password"
                     label="Passwort"
-                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                    :type="show1 ? 'text' : 'password'"
-                    @click:append="show1 = !show1"
+                    :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="show ? 'text' : 'password'"
+                    @click:append="show = !show"
                     color="black"
                     prepend-inner-icon="mdi-lock"
                     :rules="rules"
@@ -71,7 +76,7 @@
                         </v-card-title>
                         <v-card-text>
                           <v-container>
-                            <form ref="form" @submit.prevent="register()">
+                            <form ref="form">
                               <p>
                                 Bitte gib deine E-Mail-Adresse ein. So können
                                 wir dir einen Link zum Zurücksetzen schicken.
@@ -127,27 +132,61 @@
 
 <script>
 import axios from "axios";
+
 export default {
   name: "UserLogin",
+
   data() {
     return {
       username: "",
       password: "",
       email: "",
-      show1: false,
+      errorMessage: "",
+      show: false,
       rules: [
         (value) => {
           if (value) return true;
           return "Dies ist ein Pflichtfeld";
         },
       ],
-      data: "",
       dialog: false,
     };
   },
+
+  mounted() {
+    this.checkAccess();
+  },
+
   methods: {
+    /**
+     * Tokenprüfungs-Funktion:
+     * Es wird überprüft, ob der Benutzer ein AccessToken besitzt. Dieses befindet sich im LocalStorage.
+     * Liegt ein AccessToken vor, so wird der Benutzer auf die Urlaubskalender-Homepage weitergeleitet.
+     *
+     * @author David Nolte
+     *
+     * @return Der Benutzer wird auf die Urlaubskalender-Homepage weitergeleitet.
+     */
+    checkAccess() {
+      var accessToken = localStorage.getItem("AccessToken");
+      if (accessToken) {
+        this.$router.push({ name: "VacationCalendar" });
+      }
+    },
+
+    /**
+     * API-Anmeldungs-Funktion über ein POST-Request:
+     * Überprüfung der Anmeldedaten des Benutzers.
+     *
+     * @author David Nolte
+     *
+     * @param json (JSON-Datei, die den Username und das Passwort enthält)
+     *
+     * @return Bei erfolgreicher Anmeldung, sendet die API ein eindeutiges AccessToken, welches für den Benutzer generiert wird, zurück.
+     * Dieses AccessToken wird im LocalStorage gespeichert, da es im folgenden Verlauf für jeden HTTP-Request erforderlich sein wird.
+     * Im Anschluss daran wird der Benutzer auf die Urlaubskalender-Homepage weitergeleitet.
+     */
     async login() {
-      //console.log(this.username.substr(0, 2));
       const json = JSON.stringify({
         username: `${this.username}`,
         password: `${this.password}`,
@@ -165,7 +204,7 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          console.log(error.response.data.message);
+          this.errorMessage = error.response.data.message;
         });
     },
   },
