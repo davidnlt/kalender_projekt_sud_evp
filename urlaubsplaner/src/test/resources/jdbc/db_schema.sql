@@ -39,6 +39,11 @@ CREATE TABLE HolidayEntry(
 INSERT INTO Department VALUES(1, 'Anwendungsentwicklung', 60);
 INSERT INTO Department VALUES(2, 'Systemintegration', 50);
 
+#insert some dummy users for department Systemintegration
+INSERT INTO User VALUES(1, 'Max', 'Mustermann', 2, 20, 20, 'user1', '$2a$10$6teaP.Jbm2COalP5ZGZvYu0MUb7drNGKXjX8Ca3q2sFZByF4CgbdS');
+INSERT INTO User VALUES(2, 'Hallo', 'Welt', 2, 20, 20, 'user2', '$2a$10$6teaP.Jbm2COalP5ZGZvYu0MUb7drNGKXjX8Ca3q2sFZByF4CgbdS');
+
+
 #Create SQL functions
 SET GLOBAL log_bin_trust_function_creators = 1;
 
