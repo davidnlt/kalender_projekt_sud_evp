@@ -82,9 +82,9 @@ public class BasicController {
 			
 		}
 		if (!this.databaseHandler.checkDaysRemaining(username, newEntry)) {
-			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nicht genügend Urlaubstage vorhanden.\n" + 
-									"Rest: " + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + "\n" +
-									"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(newEntry)); 
+			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nicht genügend Urlaubstage vorhanden." + 
+									" Rest: " + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() +
+									" Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(newEntry)); 
 			return;
 		}
 		if (this.databaseHandler.checkDeparmentLimit(username, newEntry)){
@@ -93,7 +93,6 @@ public class BasicController {
 		}
 		this.databaseHandler.insertEntry(username, newEntry);
 		this.databaseHandler.updateUserDays(username);
-		this.httpRespone.sendError(HttpServletResponse.SC_OK, "");
 	}
 	
 	/*
@@ -109,9 +108,9 @@ public class BasicController {
 			return;
 		}
 		if (!this.databaseHandler.checkDaysRemaining(username, updatedEntry)) {
-			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nicht genügend Urlaubstage vorhanden.\n" + 
-					"Rest: " + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + "\n" +
-					"Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(updatedEntry)); 
+			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nicht genügend Urlaubstage vorhanden." + 
+					" Rest: " + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() +
+					" Tage des Eintrags: " +  this.databaseHandler.calculateWorkdays(updatedEntry)); 
 			return;
 		}
 		if (this.databaseHandler.checkDeparmentLimit(username, updatedEntry)){
@@ -120,7 +119,6 @@ public class BasicController {
 		}
 		this.databaseHandler.updateEntry(username,updatedEntry);
 		this.databaseHandler.updateUserDays(username);
-		this.httpRespone.sendError(HttpServletResponse.SC_OK, "");
 	}
 	
 	/*

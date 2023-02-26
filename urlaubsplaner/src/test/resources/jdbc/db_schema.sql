@@ -61,7 +61,7 @@ BEGIN
 	DECLARE v_count_users integer;
     DECLARE v_limit_department integer;
     
-	SELECT COUNT(entry_id) INTO v_count_entries FROM HolidayEntry WHERE ((startdate <= p_startdate AND enddate >= p_startdate) OR (startdate >= p_startdate AND enddate <= p_enddate) OR (startdate <= p_enddate AND enddate >= p_enddate) OR (startdate <= p_startdate AND enddate >= p_enddate)) AND user_id IN (SELECT id FROM User WHERE department_id = (SELECT department_id FROM User where id = p_user_id));
+	SELECT COUNT(entry_id) INTO v_count_entries FROM HolidayEntry WHERE ((startdate <= p_startdate AND enddate >= p_startdate) OR (startdate >= p_startdate AND enddate <= p_enddate) OR (startdate <= p_enddate AND enddate >= p_enddate) OR (startdate <= p_startdate AND enddate >= p_enddate)) AND user_id IN (SELECT id FROM User WHERE department_id = (SELECT department_id FROM User where id = p_user_id) AND id <> p_user_id);
     SELECT COUNT(id) INTO v_count_users FROM User WHERE department_id = (SELECT department_id FROM User where id = p_user_id);
     SELECT limit_absence INTO v_limit_department FROM Department WHERE id = (SELECT department_id FROM User where id = p_user_id);
     
