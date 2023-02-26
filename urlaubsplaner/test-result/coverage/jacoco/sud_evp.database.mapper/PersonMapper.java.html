@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import sud_evp.database.model.Person;
 
 /**
- * @author busch
+ * @author busch / kirsche
  * 
  * This class maps a result object from the jdbc connector to a java object.
  * Not all columns are included in the result set.
@@ -24,15 +24,10 @@ import sud_evp.database.model.Person;
 <span class="fc" id="L24">		Person user = new Person();</span>
 <span class="fc" id="L25">		user.setFirstname(rs.getString(&quot;firstname&quot;));</span>
 <span class="fc" id="L26">		user.setSurname(rs.getString(&quot;surname&quot;));</span>
-		try {
-<span class="fc" id="L28">			user.setDepartment(rs.getString(&quot;department&quot;));</span>
-<span class="fc" id="L29">			user.setHolidays_total(rs.getInt(&quot;holidays_total&quot;));</span>
-<span class="fc" id="L30">			user.setHolidays_remaining(rs.getInt(&quot;holidays_remaining&quot;));</span>
-		}
-<span class="nc" id="L32">		catch (Exception e){</span>
-			
-<span class="fc" id="L34">		}		</span>
-<span class="fc" id="L35">		return user;</span>
+<span class="fc" id="L27">		user.setDepartment(rs.getString(&quot;department&quot;));</span>
+<span class="fc" id="L28">		user.setHolidays_total(rs.getInt(&quot;holidays_total&quot;));</span>
+<span class="fc" id="L29">		user.setHolidays_remaining(rs.getInt(&quot;holidays_remaining&quot;));</span>
+<span class="fc" id="L30">		return user;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

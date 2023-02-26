@@ -25,12 +25,14 @@ import sud_evp.database.model.Person;
 import sud_evp.dto.EntryDto;
 
 /**
+ * rest controller to handle all non-user request to the RestController
+ * 
  * @author busch / kirsche
  *
  */
 @CrossOrigin(origins = &quot;http://localhost:3000&quot;)
 @RestController()
-<span class="fc" id="L33">public class BasicController {</span>
+<span class="fc" id="L35">public class BasicController {</span>
 	
 	@Autowired
 	private DatabaseHandler databaseHandler;
@@ -41,87 +43,93 @@ import sud_evp.dto.EntryDto;
 	
 	/*
 	 * 
+	 * @return all holiday entries in a given month of from the users of the same department
 	 */
 	@GetMapping(&quot;/dataentries/{year}/{month}&quot;)
 	public List&lt;Entry&gt; getEntries(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @PathVariable int year, @PathVariable int month) {
-<span class="fc" id="L47">		return this.databaseHandler.selectEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken), year, month);</span>
+<span class="fc" id="L50">		return this.databaseHandler.selectEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken), year, month);</span>
 	}
 	
 	/*
 	 * 
+	 * @return all holiday entries from the users of the same department
 	 */
 	@GetMapping(&quot;/alldataentries&quot;)
 	public List&lt;Entry&gt; getAllEntries(@RequestHeader(&quot;Authorization&quot;) String bearertoken) {
-<span class="fc" id="L55">		return this.databaseHandler.selectAllEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));</span>
+<span class="fc" id="L59">		return this.databaseHandler.selectAllEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));</span>
 	}
 	
 	/*
-	 * 
+	 *  
+	 * @return the user information of the user
 	 */
 	@GetMapping(&quot;/userinfo&quot;)
 	public List&lt;Person&gt; getUserInfo(@RequestHeader(&quot;Authorization&quot;) String bearertoken){
-<span class="fc" id="L63">		return this.databaseHandler.getUserInfo(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));</span>
+<span class="fc" id="L68">		return this.databaseHandler.getUserInfo(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));</span>
 	}
 	
 	/*
-	 * 
+	 *  Inserts a new entry into the database
+	 *  Sends http error when certain conditions are met.
+	 *   
 	 */
 	@PostMapping(&quot;/entry/save&quot;)
 	public void saveEntry(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @RequestBody EntryDto newEntry) throws IOException {
-<span class="fc" id="L71">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
-<span class="fc bfc" id="L72" title="All 2 branches covered.">		if (this.databaseHandler.checkEntryOverlap(username, newEntry)) {</span>
-<span class="fc" id="L73">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Überschneidung mit einen anderen Eintrag.&quot;);</span>
-<span class="fc" id="L74">			return;</span>
+<span class="fc" id="L78">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">		if (this.databaseHandler.checkEntryOverlap(username, newEntry)) {</span>
+<span class="fc" id="L80">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Überschneidung mit einen anderen Eintrag.&quot;);</span>
+<span class="fc" id="L81">			return;</span>
 			
 		}
-<span class="fc bfc" id="L77" title="All 2 branches covered.">		if (!this.databaseHandler.checkDaysRemaining(username, newEntry)) {</span>
-<span class="fc" id="L78">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Nicht genügend Urlaubstage vorhanden.\n&quot; + </span>
-<span class="fc" id="L79">									&quot;Rest: &quot; + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + &quot;\n&quot; +</span>
-<span class="fc" id="L80">									&quot;Tage des Eintrags: &quot; +  this.databaseHandler.calculateWorkdays(newEntry)); </span>
-<span class="fc" id="L81">			return;</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">		if (!this.databaseHandler.checkDaysRemaining(username, newEntry)) {</span>
+<span class="fc" id="L85">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Nicht genügend Urlaubstage vorhanden.&quot; + </span>
+<span class="fc" id="L86">									&quot; Rest: &quot; + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() +</span>
+<span class="fc" id="L87">									&quot; Tage des Eintrags: &quot; +  this.databaseHandler.calculateWorkdays(newEntry)); </span>
+<span class="fc" id="L88">			return;</span>
 		}
-<span class="fc bfc" id="L83" title="All 2 branches covered.">		if (this.databaseHandler.checkDeparmentLimit(username, newEntry)){</span>
-<span class="fc" id="L84">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Abwesendheitslimit der Abteilung von &quot; + this.databaseHandler.getDepartmentLimitFromUsername(username) + &quot;% erreicht.&quot;);</span>
-<span class="fc" id="L85">			return;</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">		if (this.databaseHandler.checkDeparmentLimit(username, newEntry)){</span>
+<span class="fc" id="L91">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Abwesendheitslimit der Abteilung von &quot; + this.databaseHandler.getDepartmentLimitFromUsername(username) + &quot;% erreicht.&quot;);</span>
+<span class="fc" id="L92">			return;</span>
 		}
-<span class="fc" id="L87">		this.databaseHandler.insertEntry(username, newEntry);</span>
-<span class="fc" id="L88">		this.databaseHandler.updateUserDays(username);</span>
-<span class="fc" id="L89">		this.httpRespone.sendError(HttpServletResponse.SC_OK, &quot;&quot;);</span>
-<span class="fc" id="L90">	}</span>
+<span class="fc" id="L94">		this.databaseHandler.insertEntry(username, newEntry);</span>
+<span class="fc" id="L95">		this.databaseHandler.updateUserDays(username);</span>
+<span class="fc" id="L96">	}</span>
 	
 	/*
+	 * Updates an existing entry on the database.
+	 * Sends http error when certain conditions are met.
 	 * 
 	 */
 	@PutMapping(&quot;/entry/update&quot;)
 	public void updateEntry(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @RequestBody EntryDto updatedEntry) throws IOException {
-<span class="fc" id="L97">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">		if (this.databaseHandler.checkEntryOverlap(username, updatedEntry)) {</span>
-<span class="fc" id="L99">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Überschneidung mit einen anderen Eintrag.&quot;); </span>
-<span class="fc" id="L100">			return;</span>
+<span class="fc" id="L105">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">		if (this.databaseHandler.checkEntryOverlap(username, updatedEntry)) {</span>
+<span class="fc" id="L107">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Überschneidung mit einen anderen Eintrag.&quot;); </span>
+<span class="fc" id="L108">			return;</span>
 		}
-<span class="fc bfc" id="L102" title="All 2 branches covered.">		if (!this.databaseHandler.checkDaysRemaining(username, updatedEntry)) {</span>
-<span class="fc" id="L103">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Nicht genügend Urlaubstage vorhanden.\n&quot; + </span>
-<span class="fc" id="L104">					&quot;Rest: &quot; + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + &quot;\n&quot; +</span>
-<span class="fc" id="L105">					&quot;Tage des Eintrags: &quot; +  this.databaseHandler.calculateWorkdays(updatedEntry)); </span>
-<span class="fc" id="L106">			return;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">		if (!this.databaseHandler.checkDaysRemaining(username, updatedEntry)) {</span>
+<span class="fc" id="L111">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Nicht genügend Urlaubstage vorhanden.&quot; + </span>
+<span class="fc" id="L112">					&quot; Rest: &quot; + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() +</span>
+<span class="fc" id="L113">					&quot; Tage des Eintrags: &quot; +  this.databaseHandler.calculateWorkdays(updatedEntry)); </span>
+<span class="fc" id="L114">			return;</span>
 		}
-<span class="fc bfc" id="L108" title="All 2 branches covered.">		if (this.databaseHandler.checkDeparmentLimit(username, updatedEntry)){</span>
-<span class="fc" id="L109">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Abwesendheitslimit der Abteilung von &quot; + this.databaseHandler.getDepartmentLimitFromUsername(username) + &quot;% erreicht.&quot;);</span>
-<span class="fc" id="L110">			return;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">		if (this.databaseHandler.checkDeparmentLimit(username, updatedEntry)){</span>
+<span class="fc" id="L117">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Abwesendheitslimit der Abteilung von &quot; + this.databaseHandler.getDepartmentLimitFromUsername(username) + &quot;% erreicht.&quot;);</span>
+<span class="fc" id="L118">			return;</span>
 		}
-<span class="fc" id="L112">		this.databaseHandler.updateEntry(username,updatedEntry);</span>
-<span class="fc" id="L113">		this.databaseHandler.updateUserDays(username);</span>
-<span class="fc" id="L114">		this.httpRespone.sendError(HttpServletResponse.SC_OK, &quot;&quot;);</span>
-<span class="fc" id="L115">	}</span>
+<span class="fc" id="L120">		this.databaseHandler.updateEntry(username,updatedEntry);</span>
+<span class="fc" id="L121">		this.databaseHandler.updateUserDays(username);</span>
+<span class="fc" id="L122">	}</span>
 	
 	/*
+	 * Deletes the holiday entry with the id of {entry_id}
 	 * 
 	 */
 	@DeleteMapping(&quot;/entry/delete/{entry_id}&quot;)
 	public void deleteEntry(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @PathVariable int entry_id) {
-<span class="fc" id="L122">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
-<span class="fc" id="L123">		this.databaseHandler.deleteEntry(username, entry_id);</span>
-<span class="fc" id="L124">		this.databaseHandler.updateUserDays(username);</span>
-<span class="fc" id="L125">	}</span>
+<span class="fc" id="L130">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
+<span class="fc" id="L131">		this.databaseHandler.deleteEntry(username, entry_id);</span>
+<span class="fc" id="L132">		this.databaseHandler.updateUserDays(username);</span>
+<span class="fc" id="L133">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

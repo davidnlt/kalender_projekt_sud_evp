@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletResponse;
 import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.model.UserTable;
 import sud_evp.dto.AuthResponseDto;
@@ -46,8 +44,6 @@ public class AuthController {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private JWTTokenGenerator jwtTokenGenerator;
-	@Autowired
-	private HttpServletResponse httpRespone;
 	
 	/*
 	 * Method to register a user to the Database
@@ -100,6 +96,6 @@ public class AuthController {
 		user.setSurname(userInformation.getSurname());
 		user.setPassword(passwordEncoder.encode(userInformation.getPassword()));
 		userRepository.save(user);
-		return new ResponseEntity<>("Benutzerdaten wurden erfolreich geändert", HttpStatus.OK);
+		return new ResponseEntity<>("Benutzerdaten wurden geändert. Neuanmeldung erforderlich!", HttpStatus.OK);
 	}
 }

@@ -20,7 +20,7 @@ import sud_evp.configuration.security.JWTAuthenticationFilter;
 import sud_evp.configuration.security.JwtAuthEntryPoint;
 
 /**
- * @author busch
+ * @author busch / kirsche
  * 
  * Configuration of the authentication process
  *
@@ -32,43 +32,45 @@ import sud_evp.configuration.security.JwtAuthEntryPoint;
 	private JwtAuthEntryPoint authEntryPoint;
 	
 	/*
+	 * Returns a filter which is matched to any request to the rest controller
 	 * 
+	 * @param http security 
 	 * 
-	 * @return 
+	 * @return filter with jwt authentication and authentication entry point for all request
 	 * 
 	 */
 	@Bean
 	public SecurityFilterChain securityFilterchain(HttpSecurity http) throws Exception{
-<span class="fc" id="L42">		 http</span>
-<span class="fc" id="L43">		    .csrf().disable()</span>
-<span class="fc" id="L44">		    .exceptionHandling()</span>
-<span class="fc" id="L45">		    .authenticationEntryPoint(authEntryPoint)</span>
-<span class="fc" id="L46">		    .and()</span>
-<span class="fc" id="L47">		    .sessionManagement()</span>
-<span class="fc" id="L48">		    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
-<span class="fc" id="L49">		    .and()</span>
-<span class="fc" id="L50">		    .authorizeHttpRequests()</span>
-<span class="fc" id="L51">		    .requestMatchers(&quot;/**&quot;).permitAll()</span>
-<span class="fc" id="L52">		    .anyRequest().authenticated()</span>
-<span class="fc" id="L53">		    .and()</span>
-<span class="fc" id="L54">		    .httpBasic();</span>
-<span class="fc" id="L55">		 http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
-<span class="fc" id="L56">		 return http.build();</span>
+<span class="fc" id="L44">		 http</span>
+<span class="fc" id="L45">		    .csrf().disable()</span>
+<span class="fc" id="L46">		    .exceptionHandling()</span>
+<span class="fc" id="L47">		    .authenticationEntryPoint(authEntryPoint)</span>
+<span class="fc" id="L48">		    .and()</span>
+<span class="fc" id="L49">		    .sessionManagement()</span>
+<span class="fc" id="L50">		    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
+<span class="fc" id="L51">		    .and()</span>
+<span class="fc" id="L52">		    .authorizeHttpRequests()</span>
+<span class="fc" id="L53">		    .requestMatchers(&quot;/**&quot;).permitAll()</span>
+<span class="fc" id="L54">		    .anyRequest().authenticated()</span>
+<span class="fc" id="L55">		    .and()</span>
+<span class="fc" id="L56">		    .httpBasic();</span>
+<span class="fc" id="L57">		 http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L58">		 return http.build();</span>
 	}
 	
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-<span class="fc" id="L61">		return authenticationConfiguration.getAuthenticationManager();</span>
+<span class="fc" id="L63">		return authenticationConfiguration.getAuthenticationManager();</span>
 	}
 	
 	@Bean
 	PasswordEncoder passwordEncoder() {
-<span class="fc" id="L66">		return new BCryptPasswordEncoder();</span>
+<span class="fc" id="L68">		return new BCryptPasswordEncoder();</span>
 	}
 	
 	@Bean
 	public JWTAuthenticationFilter jwtAuthenticationFilter() {
-<span class="fc" id="L71">		return new JWTAuthenticationFilter();</span>
+<span class="fc" id="L73">		return new JWTAuthenticationFilter();</span>
 	}
 
 }

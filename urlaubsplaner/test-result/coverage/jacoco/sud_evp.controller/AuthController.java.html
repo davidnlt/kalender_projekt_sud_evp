@@ -3,8 +3,11 @@
  */
 package sud_evp.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletResponse;
 import sud_evp.configuration.security.JWTTokenGenerator;
 import sud_evp.database.model.UserTable;
 import sud_evp.dto.AuthResponseDto;
@@ -33,7 +37,7 @@ import sud_evp.repository.UserRepository;
  */
 @CrossOrigin(origins = &quot;http://localhost:3000&quot;)
 @RestController
-<span class="fc" id="L36">public class AuthController {</span>
+<span class="fc" id="L40">public class AuthController {</span>
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	@Autowired
@@ -42,58 +46,61 @@ import sud_evp.repository.UserRepository;
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private JWTTokenGenerator jwtTokenGenerator;
+	@Autowired
+	private HttpServletResponse httpRespone;
 	
 	/*
-	 * Method to register a User to the Database
+	 * Method to register a user to the Database
 	 * 
-	 * @param JSON-File with the following format: {&quot;username&quot;:&quot;&quot;, &quot;password&quot;:&quot;&quot;, &quot;firstname&quot;:&quot;&quot;, &quot;surname&quot;:&quot;&quot;, &quot;department_id&quot;:&quot;&quot;}
+	 * @param necessary information to create a new user in the database
 	 * 
 	 * @return Returns Message with a Http-Status if the User was created or not.
 	 * 
 	 */
 	@PostMapping(&quot;/register&quot;)
 	public ResponseEntity&lt;String&gt; register(@RequestBody RegisterDto registerDto){
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">		if (userRepository.existsByUsername(registerDto.getUsername())) {</span>
-<span class="nc" id="L57">			return new ResponseEntity&lt;&gt;(&quot;Username &quot; +  registerDto.getUsername()  + &quot; existiert bereits&quot;, HttpStatus.BAD_REQUEST);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		if (userRepository.existsByUsername(registerDto.getUsername())) {</span>
+<span class="nc" id="L63">			return new ResponseEntity&lt;&gt;(&quot;Username &quot; +  registerDto.getUsername()  + &quot; existiert bereits&quot;, HttpStatus.BAD_REQUEST);</span>
 		}
-<span class="fc" id="L59">		UserTable newUser = new UserTable(registerDto.getFirstname(), </span>
-<span class="fc" id="L60">										  registerDto.getSurname(), </span>
-<span class="fc" id="L61">									  	  registerDto.getDepartment_id(), </span>
-<span class="fc" id="L62">									  	  registerDto.getUsername(), </span>
-<span class="fc" id="L63">									  	  passwordEncoder.encode(registerDto.getPassword()));</span>
-<span class="fc" id="L64">		userRepository.save(newUser);		</span>
-<span class="fc" id="L65">		return new ResponseEntity&lt;&gt;(&quot;Registrierung erfolgreich&quot;, HttpStatus.OK);</span>
+<span class="nc" id="L65">		UserTable newUser = new UserTable(registerDto.getFirstname(), </span>
+<span class="nc" id="L66">										  registerDto.getSurname(), </span>
+<span class="nc" id="L67">									  	  registerDto.getDepartment_id(), </span>
+<span class="nc" id="L68">									  	  registerDto.getUsername(), </span>
+<span class="nc" id="L69">									  	  passwordEncoder.encode(registerDto.getPassword()));</span>
+<span class="nc" id="L70">		userRepository.save(newUser);		</span>
+<span class="nc" id="L71">		return new ResponseEntity&lt;&gt;(&quot;Registrierung erfolgreich&quot;, HttpStatus.OK);</span>
 	}
 	
 	/*
 	 * Method to login the User
 	 * 
-	 * @param JSON-File with the following format: {&quot;username&quot;:&quot;&quot;, &quot;password&quot;:&quot;&quot;}
+	 * @param username + password of the user as a json
 	 * 
 	 * @return Returns Message with a Http-Status if the User username with password can be found in the database
 	 * 
 	 */
 	@PostMapping(&quot;/login&quot;)
 	public ResponseEntity&lt;AuthResponseDto&gt; login(@RequestBody LoginDto loginDto){
-<span class="nc" id="L78">		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));</span>
-<span class="nc" id="L79">		SecurityContextHolder.getContext().setAuthentication(authentication);</span>
-<span class="nc" id="L80">		String token = jwtTokenGenerator.generateToken(authentication);</span>
-<span class="nc" id="L81">		return new ResponseEntity&lt;&gt;(new AuthResponseDto(token), HttpStatus.OK);</span>
+<span class="nc" id="L84">		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));</span>
+<span class="nc" id="L85">		SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="nc" id="L86">		String token = jwtTokenGenerator.generateToken(authentication);</span>
+<span class="nc" id="L87">		return new ResponseEntity&lt;&gt;(new AuthResponseDto(token), HttpStatus.OK);</span>
 	}
 	
 	/*
 	 * Mapping for a logged-in User to change its firstname, surname or password
 	 * 
-	 * @param JSON-File with the following format: {&quot;firstname&quot;:&quot;&quot;, &quot;surname&quot;:&quot;&quot;, &quot;password&quot;:&quot;&quot;}
+	 * @param new user information
 	 * 
 	 */
 	@PostMapping(&quot;/user/update&quot;)
-	public void updateUserInformation(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @RequestBody UserEditDto userInformation){
-<span class="nc" id="L92">		UserTable user = userRepository.findByUsername(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken)).orElseThrow();</span>
-<span class="nc" id="L93">		user.setFirstname(userInformation.getFirstname());</span>
-<span class="nc" id="L94">		user.setSurname(userInformation.getSurname());</span>
-<span class="nc" id="L95">		user.setPassword(passwordEncoder.encode(userInformation.getPassword()));</span>
-<span class="nc" id="L96">		userRepository.save(user);</span>
-<span class="nc" id="L97">	}</span>
+	public ResponseEntity&lt;String&gt; updateUserInformation(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @RequestBody UserEditDto userInformation) throws IOException{
+<span class="nc" id="L98">		UserTable user = userRepository.findByUsername(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken)).orElseThrow();</span>
+<span class="nc" id="L99">		user.setFirstname(userInformation.getFirstname());</span>
+<span class="nc" id="L100">		user.setSurname(userInformation.getSurname());</span>
+<span class="nc" id="L101">		user.setPassword(passwordEncoder.encode(userInformation.getPassword()));</span>
+<span class="nc" id="L102">		userRepository.save(user);</span>
+<span class="nc" id="L103">		return new ResponseEntity&lt;&gt;(&quot;Benutzerdaten wurden erfolreich geändert&quot;, HttpStatus.OK);</span>
+	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

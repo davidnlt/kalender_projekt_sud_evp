@@ -6,9 +6,9 @@ package sud_evp.dto;
 import java.sql.Date;
 
 /**
- * @author busch
- * 
  * Data Transfer Object for inserting/changing entry information
+ * 
+ * @author busch / kirsche
  *
  */
 public class EntryDto {

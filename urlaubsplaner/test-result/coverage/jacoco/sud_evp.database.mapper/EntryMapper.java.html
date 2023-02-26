@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import sud_evp.database.model.Entry;
 
 /**
- * @author busch
+ * @author busch / kirsche
  * 
  * This class maps a result object from the jdbc connector to a java object.
  * Not all columns are included in the result set.

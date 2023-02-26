@@ -17,42 +17,54 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import sud_evp.service.CustomerUserDetailsService;
+import sud_evp.service.CustomUserDetailsService;
 
 /**
+ * Class to add a jwt authentication to every http request
+ * 
  * @author busch
  *
  */
-<span class="fc" id="L26">public class JWTAuthenticationFilter extends OncePerRequestFilter{</span>
+<span class="fc" id="L28">public class JWTAuthenticationFilter extends OncePerRequestFilter{</span>
 	
 	@Autowired
 	private JWTTokenGenerator tokenGenerator;	
 	@Autowired
-	private CustomerUserDetailsService customerUserDetailsService;
+	private CustomUserDetailsService customerUserDetailsService;
 
+	/*
+	 * checks the http request for a authentication token
+	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-<span class="fc" id="L36">		String token = getJWTFromRequest(request);</span>
+<span class="fc" id="L40">		String token = getJWTFromRequest(request);</span>
 		
-<span class="pc bpc" id="L38" title="3 of 4 branches missed.">		if(StringUtils.hasText(token) &amp;&amp; tokenGenerator.validateToken(token)) {</span>
-<span class="nc" id="L39">			String username = tokenGenerator.getUsernameFromJWTToken(token);</span>
+<span class="pc bpc" id="L42" title="3 of 4 branches missed.">		if(StringUtils.hasText(token) &amp;&amp; tokenGenerator.validateToken(token)) {</span>
+<span class="nc" id="L43">			String username = tokenGenerator.getUsernameFromJWTToken(token);</span>
 			
-<span class="nc" id="L41">			UserDetails userDetails = customerUserDetailsService.loadUserByUsername(username);</span>
-<span class="nc" id="L42">			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());</span>
-<span class="nc" id="L43">			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+<span class="nc" id="L45">			UserDetails userDetails = customerUserDetailsService.loadUserByUsername(username);</span>
+<span class="nc" id="L46">			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());</span>
+<span class="nc" id="L47">			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
 			
-<span class="nc" id="L45">			SecurityContextHolder.getContext().setAuthentication(authenticationToken);</span>
+<span class="nc" id="L49">			SecurityContextHolder.getContext().setAuthentication(authenticationToken);</span>
 		}
-<span class="fc" id="L47">		filterChain.doFilter(request, response);</span>
-<span class="fc" id="L48">	}</span>
+<span class="fc" id="L51">		filterChain.doFilter(request, response);</span>
+<span class="fc" id="L52">	}</span>
 	
+	/*
+	 * Extract the jwt token from a httpservletrequest
+	 * 
+	 * @param HttpServletRequest
+	 * 
+	 * @return jwt token of the http request
+	 * 
+	 */
 	private String getJWTFromRequest(HttpServletRequest request) {
-<span class="fc" id="L51">		String bearerToken = request.getHeader(&quot;Authorization&quot;);</span>
-<span class="pc bpc" id="L52" title="1 of 4 branches missed.">		if (StringUtils.hasText(bearerToken) &amp;&amp; bearerToken.startsWith(&quot;Bearer &quot;)) {</span>
-<span class="nc" id="L53">			return bearerToken.substring(7, bearerToken.length());</span>
+<span class="fc" id="L63">		String bearerToken = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L64" title="1 of 4 branches missed.">		if (StringUtils.hasText(bearerToken) &amp;&amp; bearerToken.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="nc" id="L65">			return bearerToken.substring(7, bearerToken.length());</span>
 		}
-<span class="fc" id="L55">		return null;</span>
+<span class="fc" id="L67">		return null;</span>
 	}
 
 }
