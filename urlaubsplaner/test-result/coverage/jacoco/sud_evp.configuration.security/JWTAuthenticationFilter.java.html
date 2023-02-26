@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWTAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">urlaubsplaner</a> &gt; <a href="index.source.html" class="el_package">sud_evp.configuration.security</a> &gt; <span class="el_source">JWTAuthenticationFilter.java</span></div><h1>JWTAuthenticationFilter.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package sud_evp.configuration.security;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import sud_evp.service.CustomerUserDetailsService;
+
+/**
+ * @author busch
+ *
+ */
+<span class="fc" id="L26">public class JWTAuthenticationFilter extends OncePerRequestFilter{</span>
+	
+	@Autowired
+	private JWTTokenGenerator tokenGenerator;	
+	@Autowired
+	private CustomerUserDetailsService customerUserDetailsService;
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+<span class="fc" id="L36">		String token = getJWTFromRequest(request);</span>
+		
+<span class="pc bpc" id="L38" title="3 of 4 branches missed.">		if(StringUtils.hasText(token) &amp;&amp; tokenGenerator.validateToken(token)) {</span>
+<span class="nc" id="L39">			String username = tokenGenerator.getUsernameFromJWTToken(token);</span>
+			
+<span class="nc" id="L41">			UserDetails userDetails = customerUserDetailsService.loadUserByUsername(username);</span>
+<span class="nc" id="L42">			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());</span>
+<span class="nc" id="L43">			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+			
+<span class="nc" id="L45">			SecurityContextHolder.getContext().setAuthentication(authenticationToken);</span>
+		}
+<span class="fc" id="L47">		filterChain.doFilter(request, response);</span>
+<span class="fc" id="L48">	}</span>
+	
+	private String getJWTFromRequest(HttpServletRequest request) {
+<span class="fc" id="L51">		String bearerToken = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L52" title="1 of 4 branches missed.">		if (StringUtils.hasText(bearerToken) &amp;&amp; bearerToken.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="nc" id="L53">			return bearerToken.substring(7, bearerToken.length());</span>
+		}
+<span class="fc" id="L55">		return null;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

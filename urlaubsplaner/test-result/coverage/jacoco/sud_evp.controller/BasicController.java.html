@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BasicController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">urlaubsplaner</a> &gt; <a href="index.source.html" class="el_package">sud_evp.controller</a> &gt; <span class="el_source">BasicController.java</span></div><h1>BasicController.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package sud_evp.controller;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletResponse;
+import sud_evp.configuration.security.JWTTokenGenerator;
+import sud_evp.database.DatabaseHandler;
+import sud_evp.database.model.Entry;
+import sud_evp.database.model.Person;
+import sud_evp.dto.EntryDto;
+
+/**
+ * @author busch / kirsche
+ *
+ */
+@CrossOrigin(origins = &quot;http://localhost:3000&quot;)
+@RestController()
+<span class="fc" id="L33">public class BasicController {</span>
+	
+	@Autowired
+	private DatabaseHandler databaseHandler;
+	@Autowired
+	private JWTTokenGenerator jwtTokenGenerator;
+	@Autowired
+	private HttpServletResponse httpRespone;
+	
+	/*
+	 * 
+	 */
+	@GetMapping(&quot;/dataentries/{year}/{month}&quot;)
+	public List&lt;Entry&gt; getEntries(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @PathVariable int year, @PathVariable int month) {
+<span class="fc" id="L47">		return this.databaseHandler.selectEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken), year, month);</span>
+	}
+	
+	/*
+	 * 
+	 */
+	@GetMapping(&quot;/alldataentries&quot;)
+	public List&lt;Entry&gt; getAllEntries(@RequestHeader(&quot;Authorization&quot;) String bearertoken) {
+<span class="fc" id="L55">		return this.databaseHandler.selectAllEntries(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));</span>
+	}
+	
+	/*
+	 * 
+	 */
+	@GetMapping(&quot;/userinfo&quot;)
+	public List&lt;Person&gt; getUserInfo(@RequestHeader(&quot;Authorization&quot;) String bearertoken){
+<span class="fc" id="L63">		return this.databaseHandler.getUserInfo(jwtTokenGenerator.getUsernameFromJWTToken(bearertoken));</span>
+	}
+	
+	/*
+	 * 
+	 */
+	@PostMapping(&quot;/entry/save&quot;)
+	public void saveEntry(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @RequestBody EntryDto newEntry) throws IOException {
+<span class="fc" id="L71">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">		if (this.databaseHandler.checkEntryOverlap(username, newEntry)) {</span>
+<span class="fc" id="L73">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Überschneidung mit einen anderen Eintrag.&quot;);</span>
+<span class="fc" id="L74">			return;</span>
+			
+		}
+<span class="fc bfc" id="L77" title="All 2 branches covered.">		if (!this.databaseHandler.checkDaysRemaining(username, newEntry)) {</span>
+<span class="fc" id="L78">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Nicht genügend Urlaubstage vorhanden.\n&quot; + </span>
+<span class="fc" id="L79">									&quot;Rest: &quot; + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + &quot;\n&quot; +</span>
+<span class="fc" id="L80">									&quot;Tage des Eintrags: &quot; +  this.databaseHandler.calculateWorkdays(newEntry)); </span>
+<span class="fc" id="L81">			return;</span>
+		}
+<span class="fc bfc" id="L83" title="All 2 branches covered.">		if (this.databaseHandler.checkDeparmentLimit(username, newEntry)){</span>
+<span class="fc" id="L84">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Abwesendheitslimit der Abteilung von &quot; + this.databaseHandler.getDepartmentLimitFromUsername(username) + &quot;% erreicht.&quot;);</span>
+<span class="fc" id="L85">			return;</span>
+		}
+<span class="fc" id="L87">		this.databaseHandler.insertEntry(username, newEntry);</span>
+<span class="fc" id="L88">		this.databaseHandler.updateUserDays(username);</span>
+<span class="fc" id="L89">		this.httpRespone.sendError(HttpServletResponse.SC_OK, &quot;&quot;);</span>
+<span class="fc" id="L90">	}</span>
+	
+	/*
+	 * 
+	 */
+	@PutMapping(&quot;/entry/update&quot;)
+	public void updateEntry(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @RequestBody EntryDto updatedEntry) throws IOException {
+<span class="fc" id="L97">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">		if (this.databaseHandler.checkEntryOverlap(username, updatedEntry)) {</span>
+<span class="fc" id="L99">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Überschneidung mit einen anderen Eintrag.&quot;); </span>
+<span class="fc" id="L100">			return;</span>
+		}
+<span class="fc bfc" id="L102" title="All 2 branches covered.">		if (!this.databaseHandler.checkDaysRemaining(username, updatedEntry)) {</span>
+<span class="fc" id="L103">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Nicht genügend Urlaubstage vorhanden.\n&quot; + </span>
+<span class="fc" id="L104">					&quot;Rest: &quot; + this.databaseHandler.getUserInfo(username).get(0).getHolidays_remaining() + &quot;\n&quot; +</span>
+<span class="fc" id="L105">					&quot;Tage des Eintrags: &quot; +  this.databaseHandler.calculateWorkdays(updatedEntry)); </span>
+<span class="fc" id="L106">			return;</span>
+		}
+<span class="fc bfc" id="L108" title="All 2 branches covered.">		if (this.databaseHandler.checkDeparmentLimit(username, updatedEntry)){</span>
+<span class="fc" id="L109">			this.httpRespone.sendError(HttpServletResponse.SC_BAD_REQUEST, &quot;Fehler, Abwesendheitslimit der Abteilung von &quot; + this.databaseHandler.getDepartmentLimitFromUsername(username) + &quot;% erreicht.&quot;);</span>
+<span class="fc" id="L110">			return;</span>
+		}
+<span class="fc" id="L112">		this.databaseHandler.updateEntry(username,updatedEntry);</span>
+<span class="fc" id="L113">		this.databaseHandler.updateUserDays(username);</span>
+<span class="fc" id="L114">		this.httpRespone.sendError(HttpServletResponse.SC_OK, &quot;&quot;);</span>
+<span class="fc" id="L115">	}</span>
+	
+	/*
+	 * 
+	 */
+	@DeleteMapping(&quot;/entry/delete/{entry_id}&quot;)
+	public void deleteEntry(@RequestHeader(&quot;Authorization&quot;) String bearertoken, @PathVariable int entry_id) {
+<span class="fc" id="L122">		String username = jwtTokenGenerator.getUsernameFromJWTToken(bearertoken);</span>
+<span class="fc" id="L123">		this.databaseHandler.deleteEntry(username, entry_id);</span>
+<span class="fc" id="L124">		this.databaseHandler.updateUserDays(username);</span>
+<span class="fc" id="L125">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
