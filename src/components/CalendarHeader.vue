@@ -4,7 +4,7 @@
       {{ department }} - Urlaubskalender
     </v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-alert v-if="successMessageUpdateUser" type="error" text outlined>
+    <v-alert v-if="successMessageUpdateUser" type="success" text outlined>
       {{ successMessageUpdateUser }}
     </v-alert>
     <v-alert v-if="errorMessageUpdateUser" type="error" text outlined>
