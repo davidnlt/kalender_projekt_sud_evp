@@ -4,6 +4,9 @@
       {{ department }} - Urlaubskalender
     </v-toolbar-title>
     <v-spacer></v-spacer>
+    <v-alert v-if="successMessageUpdateUser" type="error" text outlined>
+      {{ successMessageUpdateUser }}
+    </v-alert>
     <v-alert v-if="errorMessageUpdateUser" type="error" text outlined>
       {{ errorMessageUpdateUser }}
     </v-alert>
@@ -139,7 +142,7 @@ export default {
           return "Dies ist ein Pflichtfeld";
         },
       ],
-      errorMessageUser: "",
+      successMessageUpdateUser: "",
       errorMessageUpdateUser: "",
     };
   },
@@ -176,7 +179,6 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          this.errorMessageUser = error.response.data;
         });
     },
 
@@ -206,6 +208,7 @@ export default {
         })
         .then((response) => {
           console.log(response);
+          this.successMessageUpdateUser = response.data;
         })
         .catch((error) => {
           console.log(error);
