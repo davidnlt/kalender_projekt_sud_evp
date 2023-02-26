@@ -1,7 +1,7 @@
 <template>
   <v-toolbar color="white">
     <v-toolbar-title class="text-center font-weight-bold">
-      {{ department }} - Urblaubskalender
+      {{ department }} - Urlaubskalender
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-alert v-if="errorMessageUpdateUser" type="error" text outlined>

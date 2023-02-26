@@ -12,6 +12,9 @@
             <v-alert v-if="errorMessage" type="error" text outlined>
               {{ errorMessage }}
             </v-alert>
+            <v-alert v-if="errorMessageAddEntry" type="error" text outlined>
+              {{ errorMessageAddEntry }}
+            </v-alert>
             <v-toolbar flat>
               <v-btn
                 variant="outlined"
@@ -47,14 +50,6 @@
                     <span class="text-h5"> Urlaubseintrag hinzufügen</span>
                   </v-card-title>
                   <v-card-text>
-                    <v-alert
-                      v-if="errorMessageAddEntry"
-                      type="error"
-                      text
-                      outlined
-                    >
-                      {{ errorMessageAddEntry }}
-                    </v-alert>
                     <v-container>
                       <form ref="form" @submit.prevent="addVacationEntry()">
                         <v-row>
@@ -621,7 +616,7 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          this.errorMessageUpdateEvent = error.response.data;
+          this.errorMessageUpdateEvent = error.response.data.message;
         });
     },
 
@@ -651,7 +646,7 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          this.errorMessageUpdateEvent = error.response.data;
+          this.errorMessageUpdateEvent = error.response.data.message;
         });
     },
 
@@ -687,7 +682,7 @@ export default {
         })
         .catch((error) => {
           console.log(error);
-          this.errorMessageAddEntry = error.response.data;
+          this.errorMessageAddEntry = error.response.data.message;
         });
     },
   },
