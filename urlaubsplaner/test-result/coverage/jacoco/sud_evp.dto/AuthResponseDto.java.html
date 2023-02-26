@@ -4,34 +4,35 @@
 package sud_evp.dto;
 
 /**
+ * Data Transfer Object to export the access token
+ * 
  * @author busch
  * 
- * Data Transfer Object to export the access token
  *
  */
 public class AuthResponseDto {
 	private String accessToken;
-<span class="nc" id="L14">	private String tokenType = &quot;Bearer &quot;;</span>
+<span class="nc" id="L15">	private String tokenType = &quot;Bearer &quot;;</span>
 	
-<span class="nc" id="L16">	public AuthResponseDto(String acessToken) {</span>
-<span class="nc" id="L17">		this.accessToken = acessToken;</span>
-<span class="nc" id="L18">	}</span>
+<span class="nc" id="L17">	public AuthResponseDto(String acessToken) {</span>
+<span class="nc" id="L18">		this.accessToken = acessToken;</span>
+<span class="nc" id="L19">	}</span>
 
 	public String getAccessToken() {
-<span class="nc" id="L21">		return accessToken;</span>
+<span class="nc" id="L22">		return accessToken;</span>
 	}
 
 	public void setAccessToken(String accessToken) {
-<span class="nc" id="L25">		this.accessToken = accessToken;</span>
-<span class="nc" id="L26">	}</span>
+<span class="nc" id="L26">		this.accessToken = accessToken;</span>
+<span class="nc" id="L27">	}</span>
 
 	public String getTokenType() {
-<span class="nc" id="L29">		return tokenType;</span>
+<span class="nc" id="L30">		return tokenType;</span>
 	}
 
 	public void setTokenType(String tokenType) {
-<span class="nc" id="L33">		this.tokenType = tokenType;</span>
-<span class="nc" id="L34">	}</span>
+<span class="nc" id="L34">		this.tokenType = tokenType;</span>
+<span class="nc" id="L35">	}</span>
 	
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

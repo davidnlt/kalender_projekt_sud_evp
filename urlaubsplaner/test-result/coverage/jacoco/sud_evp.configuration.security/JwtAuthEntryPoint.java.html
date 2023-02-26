@@ -14,17 +14,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
+ * Class to handle the authentication entry point
+ * 
  * @author busch
  *
  */
 @Component
-<span class="fc" id="L21">public class JwtAuthEntryPoint implements AuthenticationEntryPoint{</span>
+<span class="fc" id="L23">public class JwtAuthEntryPoint implements AuthenticationEntryPoint{</span>
 
+	/*
+	 * sends an http response unauthorized error
+	 */
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
 		// TODO Auto-generated method stub
-<span class="nc" id="L26">		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());</span>
-<span class="nc" id="L27">	}</span>
+<span class="nc" id="L31">		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());</span>
+<span class="nc" id="L32">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -17,44 +17,68 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 /**
+ * Class to handle jwt tokens
+ * 
  * @author busch
  *
  */
 @Component
-<span class="fc" id="L24">public class JWTTokenGenerator {</span>
+<span class="fc" id="L26">public class JWTTokenGenerator {</span>
 	
 	private static final long JWT_TOKEN_EXPIRATION = 86400000; // 1 Day
-<span class="fc" id="L27">	private SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);</span>
+<span class="fc" id="L29">	private SecretKey secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);</span>
 	
+	/*
+	 * Generates a jwt token for a authentication
+	 * 
+	 * @param authentication with username and password
+	 * 
+	 * @return jwt token
+	 */
 	public String generateToken(Authentication authentication) {
-<span class="fc" id="L30">		String username = authentication.getName();</span>
-<span class="fc" id="L31">		Date currentDate = new Date();</span>
-<span class="fc" id="L32">		Date expireDate = new Date(currentDate.getTime() + JWT_TOKEN_EXPIRATION);</span>
+<span class="fc" id="L39">		String username = authentication.getName();</span>
+<span class="fc" id="L40">		Date currentDate = new Date();</span>
+<span class="fc" id="L41">		Date expireDate = new Date(currentDate.getTime() + JWT_TOKEN_EXPIRATION);</span>
 		
-<span class="fc" id="L34">		String token = Jwts.builder()</span>
-<span class="fc" id="L35">				.setSubject(username)</span>
-<span class="fc" id="L36">				.setIssuedAt(new Date())</span>
-<span class="fc" id="L37">				.setExpiration(expireDate)</span>
-<span class="fc" id="L38">				.signWith(secret)</span>
-<span class="fc" id="L39">				.compact();</span>
-<span class="fc" id="L40">		return token;</span>
+<span class="fc" id="L43">		String token = Jwts.builder()</span>
+<span class="fc" id="L44">				.setSubject(username)</span>
+<span class="fc" id="L45">				.setIssuedAt(new Date())</span>
+<span class="fc" id="L46">				.setExpiration(expireDate)</span>
+<span class="fc" id="L47">				.signWith(secret)</span>
+<span class="fc" id="L48">				.compact();</span>
+<span class="fc" id="L49">		return token;</span>
 	}
 	
+	/*
+	 * Gets the username from a jwt token
+	 * 
+	 * @param jwt token
+	 * 
+	 * @return username
+	 */
 	public String getUsernameFromJWTToken(String token) {
-<span class="fc" id="L44">		Claims claims = Jwts.parserBuilder()</span>
-<span class="fc" id="L45">				.setSigningKey(secret)</span>
-<span class="fc" id="L46">				.build()</span>
-<span class="fc" id="L47">				.parseClaimsJws(token)</span>
-<span class="fc" id="L48">				.getBody();</span>
-<span class="fc" id="L49">		return claims.getSubject();</span>
+<span class="fc" id="L60">		Claims claims = Jwts.parserBuilder()</span>
+<span class="fc" id="L61">				.setSigningKey(secret)</span>
+<span class="fc" id="L62">				.build()</span>
+<span class="fc" id="L63">				.parseClaimsJws(token)</span>
+<span class="fc" id="L64">				.getBody();</span>
+<span class="fc" id="L65">		return claims.getSubject();</span>
 	}
 	
+	/*
+	 * Checks if the token has expired or is wrong
+	 * 
+	 * @param jwt token
+	 * 
+	 * @return true if token is valid
+	 * 
+	 */
 	public boolean validateToken(String token) {
 		try {
-<span class="nc" id="L54">			Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token);</span>
-<span class="nc" id="L55">			return true;</span>
-<span class="nc" id="L56">		} catch (Exception e) {</span>
-<span class="nc" id="L57">			throw new AuthenticationCredentialsNotFoundException(&quot;Token ist abgelaufen oder falsch&quot;);</span>
+<span class="nc" id="L78">			Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token);</span>
+<span class="nc" id="L79">			return true;</span>
+<span class="nc" id="L80">		} catch (Exception e) {</span>
+<span class="nc" id="L81">			throw new AuthenticationCredentialsNotFoundException(&quot;Token ist abgelaufen oder falsch&quot;);</span>
 		}
 	}
 	
