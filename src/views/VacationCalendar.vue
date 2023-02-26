@@ -5,6 +5,7 @@
       <v-row>
         <v-col>
           <v-sheet>
+            <!-- Navbar -->
             <v-alert v-if="successMessage" type="success" text outlined>
               {{ successMessage }}
             </v-alert>
